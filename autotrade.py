@@ -6,6 +6,8 @@ import tkinter as tk
 from tkinter import filedialog
 from PIL import Image, ImageTk
 import threading
+import keyboard
+
 
 # Global variables
 selected_item_images = {}
@@ -31,12 +33,20 @@ def start_trading():
         if chat_area:
             for image_path, is_selected in selected_item_images.items():
                 if is_selected:
-                    item_location = pyautogui.locateOnScreen(image_path, confidence=0.8)
+                    # Get screen dimensions
+                    screen_width, screen_height = pyautogui.size()
+
+                    # Calculate region: the whole width but only 200 pixels from the bottom of the screen
+                    region_to_search_for_item = (0, screen_height - 200, screen_width, 200)
+
+                    # Then update this line in your start_trading function
+                    item_location = pyautogui.locateOnScreen(image_path, confidence=0.8, region=region_to_search_for_item)
+
                     if item_location:
                         print(f"Found item: {image_path}")
                         # click logic here
                         # Calculate coordinates for right-click
-                        right_click_x = item_location.left - 10  # 10 pixels to the left
+                        right_click_x = item_location.left - 15  # 10 pixels to the left
                         right_click_y = item_location.top + item_location.height // 2  # Middle of the height
                         
                         # Perform the right-click
@@ -47,11 +57,11 @@ def start_trading():
                         time.sleep(1)
                         trade_location = pyautogui.locateOnScreen('click_trade.jpg', confidence=0.8)
                         if trade_location:
-                            time.sleep(0.1)
+                            #time.sleep(0.1)
                             pyautogui.moveTo(trade_location)
                             pyautogui.click(trade_location)
                             print("Clicked trade")
-                            stop_trading()
+                            #stop_trading()
                         
                         
         time.sleep(2)
@@ -107,7 +117,7 @@ def refresh_images():
 
 # GUI setup
 root = tk.Tk()
-root.title("Auto Trading Bot")
+root.title("DND Trading Bot")
 root.geometry("600x400")
 
 frame = tk.Frame(root)
@@ -130,9 +140,13 @@ load_button.pack(pady=40)  # Moved down by 20px
 
 start_button = tk.Button(root, text="Start Trading", command=lambda: threading.Thread(target=start_trading).start())
 start_button.pack(pady=5)  # 5px gap
+keyboard.add_hotkey('F9', start_trading)
+
 
 stop_button = tk.Button(root, text="Stop Trading", command=stop_trading)
 stop_button.pack(pady=5)  # 5px gap
+keyboard.add_hotkey('F8', stop_trading)
+
 
 refresh_images()
 
