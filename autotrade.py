@@ -48,9 +48,10 @@ def start_trading():
                         trade_location = pyautogui.locateOnScreen('click_trade.jpg', confidence=0.8)
                         if trade_location:
                             time.sleep(0.1)
+                            pyautogui.moveTo(trade_location)
                             pyautogui.click(trade_location)
                             print("Clicked trade")
-                            #stop_trading()
+                            stop_trading()
                         
                         
         time.sleep(2)
