@@ -55,7 +55,7 @@ def start_trading():
                         # Wait for the menu to appear
                         #click trade
                         time.sleep(1)
-                        trade_location = pyautogui.locateOnScreen('click_trade.jpg', confidence=0.8)
+                        trade_location = pyautogui.locateOnScreen('click_trade.jpg', confidence=0.7)
                         if trade_location:
                             #time.sleep(0.1)
                             pyautogui.moveTo(trade_location)
@@ -64,7 +64,7 @@ def start_trading():
                             #stop_trading()
                         
                         
-        time.sleep(2)
+        time.sleep(1)
 
 def stop_trading():
     global is_trading
