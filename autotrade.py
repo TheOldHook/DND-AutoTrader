@@ -34,7 +34,25 @@ def start_trading():
                     item_location = pyautogui.locateOnScreen(image_path, confidence=0.8)
                     if item_location:
                         print(f"Found item: {image_path}")
-                        # Your drag and click logic here
+                        # click logic here
+                        # Calculate coordinates for right-click
+                        right_click_x = item_location.left - 10  # 10 pixels to the left
+                        right_click_y = item_location.top + item_location.height // 2  # Middle of the height
+                        
+                        # Perform the right-click
+                        pyautogui.rightClick(right_click_x, right_click_y)
+                        
+                        # Wait for the menu to appear
+                        #click trade
+                        time.sleep(1)
+                        trade_location = pyautogui.locateOnScreen('click_trade.jpg', confidence=0.8)
+                        if trade_location:
+                            time.sleep(0.1)
+                            pyautogui.click(trade_location)
+                            print("Clicked trade")
+                            #stop_trading()
+                        
+                        
         time.sleep(2)
 
 def stop_trading():
