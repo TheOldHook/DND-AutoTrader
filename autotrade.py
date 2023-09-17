@@ -342,7 +342,8 @@ def monitor_trade_room():
                     print(f"Gold value region captured: {gold_value_text}")
 
                     entry_value = chat_entry.get()  # Get the value from the Tkinter entry box
-                    if entry_value == gold_value_text:
+                    #if entry_value == gold_value_text:
+                    if gold_value_text >= entry_value
                         print("Gold value matches the set entry value. Proceeding to click.")
                         
                         # Your code to click on an image goes here
@@ -458,7 +459,7 @@ def start_auto_chat():
                 time.sleep(0.3)
                 pyautogui.moveTo(stash)
                 pyautogui.click(stash)
-                time.sleep(0.3)
+                time.sleep(1)
                 pyautogui.click(item_position)
                 monitor_trade_room()
             stop_auto_chat()  # Stop the auto chat
