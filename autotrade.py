@@ -8,6 +8,7 @@ from PIL import Image, ImageTk
 import threading
 import keyboard
 import pytesseract
+import queue
 
 from tkinter import Entry, Label
 
@@ -20,8 +21,80 @@ is_auto_chatting = False
 item_position = None  # Store the position of the selected item
 chat_text = None  # Store the chat text
 is_monitoring_trade_room = False  # A global flag
+debug_windows = {}  # Initialize debug_windows here as an empty dictionary
+last_debug_coordinates = {}
 
 
+
+##################### Debugging start #######################################
+is_debug_mode = False
+debug_window = None
+debug_thread = None
+debug_queue = queue.Queue()
+
+def toggle_debug_mode():
+    global is_debug_mode, debug_windows, debug_thread, debug_queue
+
+    if is_debug_mode:
+        for name, window in debug_windows.items():
+            window.destroy()
+        debug_windows.clear()
+        is_debug_mode = False
+        print("Debug mode disabled.")
+    else:
+        is_debug_mode = True
+        print("Debug mode enabled.")
+        if debug_thread is None:
+            debug_thread = threading.Thread(target=update_debug_square_position, args=(debug_queue,))
+            debug_thread.daemon = True  # Set as a daemon thread
+            debug_thread.start()
+
+        
+def create_debug_window(width, height):
+    window = tk.Toplevel(root)
+    window.overrideredirect(True)
+    window.wm_attributes("-alpha", 0.3)  # Make window transparent
+
+    canvas = tk.Canvas(window, bg="blue", width=width, height=height)
+    canvas.pack()
+    canvas.create_rectangle(0, 0, width, height, outline="red", width=2)
+
+    return window
+
+def update_debug_square_position(q):
+    global debug_windows, is_debug_mode, last_debug_coordinates
+
+    while True:
+        if is_debug_mode:
+            # Your code to calculate the current coordinates
+            current_coordinates = {
+                'region_to_search_for_item': (0, 400, 800, 200),
+                'gold_value_location': (815, 340, 100, 30) 
+            }
+
+            # Check if coordinates have changed
+            if current_coordinates != last_debug_coordinates:
+                q.put(current_coordinates)
+                last_debug_coordinates = current_coordinates  # Update last known coordinates
+
+        time.sleep(0.1)
+
+def check_queue():
+    try:
+        while True:
+            data = debug_queue.get_nowait()
+            # Update your Tkinter GUI here based on 'data'
+            for area_name, coords in data.items():
+                x, y, width, height = coords
+                if area_name not in debug_windows:
+                    debug_windows[area_name] = create_debug_window(width, height)
+                debug_windows[area_name].geometry(f"{width}x{height}+{x}+{y}")
+    except queue.Empty:
+        pass
+    root.after(100, check_queue)  # Check the queue every 100ms
+
+
+############### DEBUGING END #########################################
 
 if not os.path.exists(default_folder):
     os.makedirs(default_folder)
@@ -46,10 +119,17 @@ def start_trading():
                     screen_width, screen_height = pyautogui.size()
 
                     # Calculate region: the whole width but only 200 pixels from the bottom of the screen
-                    region_to_search_for_item = (0, screen_height - 200, screen_width, 200)
-
+                    region_to_search_for_item = (0, screen_height - 200, screen_width, 100)
+                    debug_queue.put({'region_to_search_for_item': region_to_search_for_item})
                     # Then update this line in your start_trading function
                     item_location = pyautogui.locateOnScreen(image_path, confidence=0.8, region=region_to_search_for_item)
+                    
+
+                    # Update debug window directly
+                    if is_debug_mode:
+                        debug_queue.put({'region_to_search_for_item': region_to_search_for_item})
+
+
 
                     if item_location:
                         print(f"Found item: {image_path}")
@@ -63,7 +143,7 @@ def start_trading():
                         
                         # Wait for the menu to appear
                         #click trade
-                        time.sleep(1)
+                        time.sleep(0.1)
                         trade_location = pyautogui.locateOnScreen('click_trade.jpg', confidence=0.7)
                         if trade_location:
                             #time.sleep(0.1)
@@ -73,7 +153,7 @@ def start_trading():
                             #stop_trading()
                         
                         
-        time.sleep(1)
+        time.sleep(0.3)
 
 def stop_trading():
     global is_trading
@@ -132,7 +212,7 @@ def refresh_images():
 # GUI setup
 root = tk.Tk()
 root.title("DND Trading Bot")
-root.geometry("600x400")
+root.geometry("800x500")
 
 frame = tk.Frame(root)
 frame.pack(side=tk.LEFT, padx=10, pady=10)
@@ -194,47 +274,38 @@ def monitor_trade_room():
             # Check the phase of the trade
             phase1_location = pyautogui.locateOnScreen('trading_phase1.png', confidence=0.8)
             phase2_location = pyautogui.locateOnScreen('trading_phase2.png', confidence=0.8)
-            
+            hardcoded_coordinates = (815, 340, 100, 30)
             
             if phase1_location:
                 print("Phase 1 detected.")
-                gold_value_location = pyautogui.locateOnScreen('goldphase1.png', confidence=0.8)
-                if gold_value_location:
-                    # Capture the region where the value should be (assuming it's to the right of totalgold.png)
-                    region_to_check_value = (
-                        gold_value_location.left + gold_value_location.width + 5,  # Start 5 pixels to the right
-                        gold_value_location.top,
-                        100,  # Width of the region to check
-                        gold_value_location.height  # Height of the region to check
-                    )
-                    
-                    # Use OCR to read the value
-                    gold_value = pyautogui.screenshot(region=region_to_check_value)
-                    #gold_value_text = pytesseract.image_to_string(gold_value).strip()  # Convert image to string
+                            # Directly put hardcoded coordinates into the debug queue
+                if is_debug_mode:
+                    debug_queue.put({'gold_value_location': hardcoded_coordinates})
 
-                    # Perform OCR operation here if needed
-                    
-                    #print(f"Gold value region captured: {gold_value_text}")  # Replace with OCR result if OCR is used
+                # Use OCR to read the value
+                pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # Update this path
+                gold_value = pyautogui.screenshot(region=hardcoded_coordinates)
+                gold_value_text = pytesseract.image_to_string(gold_value).strip()  # Convert image to string
+                
+                # Save the screenshot for debugging
+                gold_value.save("debug_screenshot.png")
+                
+                if gold_value_text:
+                    print(f"Gold value region captured: {gold_value_text}")
+                else:
+                    print("No text captured.")
+                
             
             if phase2_location:
                 print("Phase 2 detected.")
                 # Check for the total gold value
-                totalgold_location = pyautogui.locateOnScreen('totalgold1.jpg', confidence=0.8)
-                if totalgold_location:
-                    # Capture the region where the value should be (assuming it's to the right of totalgold.png)
-                    region_to_check_value = (
-                        totalgold_location.left + totalgold_location.width + 5,  # Start 5 pixels to the right
-                        totalgold_location.top,
-                        100,  # Width of the region to check
-                        totalgold_location.height  # Height of the region to check
-                    )
-                    
-                    # Use OCR to read the value
-                    gold_value = pyautogui.screenshot(region=region_to_check_value)
-                    #gold_value_text = pytesseract.image_to_string(gold_value).strip()  # Convert image to string
-                    # Perform OCR operation here if needed
-                    
-                    #print(f"Gold value region captured: {gold_value_text}")  # Replace with OCR result if OCR is used
+
+                # Use OCR to read the value
+                pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # Update this path
+                gold_value = pyautogui.screenshot(region=hardcoded_coordinates)
+                gold_value_text = pytesseract.image_to_string(gold_value).strip()  # Convert image to string
+                
+                print(f"Gold value region captured: {gold_value_text}")  # Replace with OCR result if OCR is used
             
             time.sleep(1)  # Check every second or adjust this timing as needed
         else:
@@ -355,6 +426,9 @@ test_button.pack(pady=5)
 stop_monitor_button = tk.Button(root, text="Stop Monitoring Trade Room", command=stop_monitoring_trade_room)
 stop_monitor_button.pack(pady=5)
 
+debug_button = tk.Button(root, text="Toggle Debug", command=toggle_debug_mode)
+debug_button.pack(pady=5)
+
 
 # Bind Shift+Mouse1 to capture the item position
 keyboard.on_press_key('shift', capture_item_position, suppress=False)
@@ -362,5 +436,5 @@ keyboard.on_press_key('shift', capture_item_position, suppress=False)
 
 keyboard.add_hotkey('F8', stop_auto_chat)
 
-
+root.after(100, check_queue)
 root.mainloop()
