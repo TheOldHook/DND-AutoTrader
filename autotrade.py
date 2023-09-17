@@ -338,11 +338,53 @@ def monitor_trade_room():
                 custom_oem_psm_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789'
                 gold_value_text = pytesseract.image_to_string(gray_image, config=custom_oem_psm_config).strip()
 
-
                 if gold_value_text:
                     print(f"Gold value region captured: {gold_value_text}")
+
+                    entry_value = chat_entry.get()  # Get the value from the Tkinter entry box
+                    if entry_value == gold_value_text:
+                        print("Gold value matches the set entry value. Proceeding to click.")
+                        
+                        # Your code to click on an image goes here
+                        # For example, locate and click on an "Accept" button
+                        accept_button_location = pyautogui.locateOnScreen('greycheck.png', confidence=0.8)
+                        if accept_button_location:
+                            pyautogui.click(accept_button_location)
+                            time.sleep(3)
+                            
+                        pyautogui.click(703, 319)
+                        time.sleep(0.1)
+                        pyautogui.click(752, 328)
+                        time.sleep(0.1)
+                        pyautogui.click(793, 332)
+                        time.sleep(0.1)
+                        pyautogui.click(839, 328)
+                        time.sleep(0.1)
+                        pyautogui.click(706, 375)
+                        time.sleep(0.1)
+                        pyautogui.click(752, 375)
+                        time.sleep(0.1)
+                        pyautogui.click(794, 375)
+                        time.sleep(0.1)
+                        pyautogui.click(842, 375)
+                        time.sleep(0.1)
+                        pyautogui.click(887, 375)
+                        
+                        time.sleep(1)
+                        
+                        accept_button_location = pyautogui.locateOnScreen('greycheck.png', confidence=0.8)
+                        if accept_button_location:
+                            pyautogui.click(accept_button_location)
+                            time.sleep(3)
+                        
+
+                    else:
+                        print("Gold value does not match the set entry value.")
+                        #keyboard.press('esc')  # Press the Esc key to stop the trade
+                        #stop_monitoring_trade_room()
                 else:
                     print("No text captured.")
+
                 
             
             if phase2_location:
