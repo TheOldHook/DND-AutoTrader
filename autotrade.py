@@ -9,6 +9,8 @@ import threading
 import keyboard
 import pytesseract
 import queue
+import cv2
+import numpy as np
 
 from tkinter import Entry, Label
 
@@ -32,6 +34,38 @@ debug_window = None
 debug_thread = None
 debug_queue = queue.Queue()
 
+
+
+
+# Function to read image and extract value
+from PIL import ImageEnhance, ImageFilter
+
+def read_test_image():
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # Update this path
+
+    test_image_path = "test_im.png"  # Replace with the path to your test image
+    test_image = Image.open(test_image_path)
+
+    # Image preprocessing
+    test_image = test_image.convert('L')  # Convert to grayscale
+    test_image = test_image.filter(ImageFilter.SHARPEN)  # Apply sharpen filter
+    enhancer = ImageEnhance.Contrast(test_image)
+    test_image = enhancer.enhance(2)  # Increase contrast
+    test_image.save('debug_image.png')  # Save the image for debugging
+    
+    # Perform OCR on the test image
+    custom_oem_psm_config = r'--oem 3 --psm 6'
+    extracted_text = pytesseract.image_to_string(test_image, config=custom_oem_psm_config).strip()
+
+    # Display the result in a new Tkinter window
+    result_window = tk.Toplevel(root)
+    result_window.title("OCR Result")
+    
+    result_label = tk.Label(result_window, text=f"Extracted Text: {extracted_text}")
+    result_label.pack(pady=10)
+
+
+
 def toggle_debug_mode():
     global is_debug_mode, debug_windows, debug_thread, debug_queue
 
@@ -48,6 +82,7 @@ def toggle_debug_mode():
             debug_thread = threading.Thread(target=update_debug_square_position, args=(debug_queue,))
             debug_thread.daemon = True  # Set as a daemon thread
             debug_thread.start()
+
 
         
 def create_debug_window(width, height):
@@ -69,7 +104,7 @@ def update_debug_square_position(q):
             # Your code to calculate the current coordinates
             current_coordinates = {
                 'region_to_search_for_item': (0, 400, 800, 200),
-                'gold_value_location': (815, 340, 100, 30) 
+                'gold_value_location': (815, 345, 100, 20)
             }
 
             # Check if coordinates have changed
@@ -274,7 +309,7 @@ def monitor_trade_room():
             # Check the phase of the trade
             phase1_location = pyautogui.locateOnScreen('trading_phase1.png', confidence=0.8)
             phase2_location = pyautogui.locateOnScreen('trading_phase2.png', confidence=0.8)
-            hardcoded_coordinates = (815, 340, 100, 30)
+            hardcoded_coordinates = (815, 345, 100, 20)
             
             if phase1_location:
                 print("Phase 1 detected.")
@@ -283,13 +318,27 @@ def monitor_trade_room():
                     debug_queue.put({'gold_value_location': hardcoded_coordinates})
 
                 # Use OCR to read the value
-                pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # Update this path
+                pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
                 gold_value = pyautogui.screenshot(region=hardcoded_coordinates)
-                gold_value_text = pytesseract.image_to_string(gold_value).strip()  # Convert image to string
+
+                # Convert PIL Image to NumPy array
+                gold_value_np = np.array(gold_value)
                 
+                # Convert RGB to Grayscale
+                gray = cv2.cvtColor(gold_value_np, cv2.COLOR_BGR2GRAY)
+                
+                # Convert NumPy array to PIL Image
+                gray_image = Image.fromarray(gray)
+
                 # Save the screenshot for debugging
-                gold_value.save("debug_screenshot.png")
-                
+                gray_image.save("debug_screenshot_gray.png")
+
+
+                # Custom Tesseract Configuration
+                custom_oem_psm_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789'
+                gold_value_text = pytesseract.image_to_string(gray_image, config=custom_oem_psm_config).strip()
+
+
                 if gold_value_text:
                     print(f"Gold value region captured: {gold_value_text}")
                 else:
@@ -300,12 +349,35 @@ def monitor_trade_room():
                 print("Phase 2 detected.")
                 # Check for the total gold value
 
+                if is_debug_mode:
+                    debug_queue.put({'gold_value_location': hardcoded_coordinates})
+
                 # Use OCR to read the value
-                pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # Update this path
+                pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
                 gold_value = pyautogui.screenshot(region=hardcoded_coordinates)
-                gold_value_text = pytesseract.image_to_string(gold_value).strip()  # Convert image to string
+
+                # Convert PIL Image to NumPy array
+                gold_value_np = np.array(gold_value)
                 
-                print(f"Gold value region captured: {gold_value_text}")  # Replace with OCR result if OCR is used
+                # Convert RGB to Grayscale
+                gray = cv2.cvtColor(gold_value_np, cv2.COLOR_BGR2GRAY)
+                
+                # Convert NumPy array to PIL Image
+                gray_image = Image.fromarray(gray)
+
+                # Save the screenshot for debugging
+                gray_image.save("debug_screenshot_gray.png")
+
+
+                # Custom Tesseract Configuration
+                custom_oem_psm_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789'
+                gold_value_text = pytesseract.image_to_string(gray_image, config=custom_oem_psm_config).strip()
+
+
+                if gold_value_text:
+                    print(f"Gold value region captured: {gold_value_text}")
+                else:
+                    print("No text captured.")
             
             time.sleep(1)  # Check every second or adjust this timing as needed
         else:
@@ -428,6 +500,10 @@ stop_monitor_button.pack(pady=5)
 
 debug_button = tk.Button(root, text="Toggle Debug", command=toggle_debug_mode)
 debug_button.pack(pady=5)
+
+# Add a button to your main Tkinter window to trigger this function
+test_button = tk.Button(root, text="Read Test Image", command=read_test_image)
+test_button.pack(pady=5)
 
 
 # Bind Shift+Mouse1 to capture the item position
