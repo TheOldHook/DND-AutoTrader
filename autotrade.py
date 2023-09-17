@@ -7,6 +7,8 @@ from tkinter import filedialog
 from PIL import Image, ImageTk
 import threading
 import keyboard
+import pytesseract
+
 from tkinter import Entry, Label
 
 
@@ -16,6 +18,8 @@ is_trading = False
 default_folder = './default_images/'
 is_auto_chatting = False
 item_position = None  # Store the position of the selected item
+chat_text = None  # Store the chat text
+is_monitoring_trade_room = False  # A global flag
 
 
 
@@ -171,11 +175,82 @@ def capture_item_position(e):
     global item_position
     item_position = pyautogui.position()
     print(f"Captured item position: {item_position}")
+    
+    
+    
+    
+    
+def monitor_trade_room():
+    global is_monitoring_trade_room
+    is_monitoring_trade_room = True
+    while is_monitoring_trade_room:  # Check the flag here
+        # Check if you're in a private trading room
+        #pvroom_location = pyautogui.locateOnScreen('pvtroom2.jpg', confidence=0.8)
+        #pvroom_location2 = pyautogui.locateOnScreen('pvtroom.png', confidence=0.8)
+        pvroom_location = pyautogui.locateOnScreen('pvtroom3.jpg', confidence=0.8)
+        if pvroom_location:
+            print("You are in a private trading room.")
+            
+            # Check the phase of the trade
+            phase1_location = pyautogui.locateOnScreen('trading_phase1.png', confidence=0.8)
+            phase2_location = pyautogui.locateOnScreen('trading_phase2.png', confidence=0.8)
+            
+            
+            if phase1_location:
+                print("Phase 1 detected.")
+                gold_value_location = pyautogui.locateOnScreen('goldphase1.png', confidence=0.8)
+                if gold_value_location:
+                    # Capture the region where the value should be (assuming it's to the right of totalgold.png)
+                    region_to_check_value = (
+                        gold_value_location.left + gold_value_location.width + 5,  # Start 5 pixels to the right
+                        gold_value_location.top,
+                        100,  # Width of the region to check
+                        gold_value_location.height  # Height of the region to check
+                    )
+                    
+                    # Use OCR to read the value
+                    gold_value = pyautogui.screenshot(region=region_to_check_value)
+                    #gold_value_text = pytesseract.image_to_string(gold_value).strip()  # Convert image to string
+
+                    # Perform OCR operation here if needed
+                    
+                    #print(f"Gold value region captured: {gold_value_text}")  # Replace with OCR result if OCR is used
+            
+            if phase2_location:
+                print("Phase 2 detected.")
+                # Check for the total gold value
+                totalgold_location = pyautogui.locateOnScreen('totalgold1.jpg', confidence=0.8)
+                if totalgold_location:
+                    # Capture the region where the value should be (assuming it's to the right of totalgold.png)
+                    region_to_check_value = (
+                        totalgold_location.left + totalgold_location.width + 5,  # Start 5 pixels to the right
+                        totalgold_location.top,
+                        100,  # Width of the region to check
+                        totalgold_location.height  # Height of the region to check
+                    )
+                    
+                    # Use OCR to read the value
+                    gold_value = pyautogui.screenshot(region=region_to_check_value)
+                    #gold_value_text = pytesseract.image_to_string(gold_value).strip()  # Convert image to string
+                    # Perform OCR operation here if needed
+                    
+                    #print(f"Gold value region captured: {gold_value_text}")  # Replace with OCR result if OCR is used
+            
+            time.sleep(1)  # Check every second or adjust this timing as needed
+        else:
+            print("You are not in a private trading room.")
+            break  # Exit the loop if not in a private room
+
+def stop_monitoring_trade_room():
+    global is_monitoring_trade_room
+    is_monitoring_trade_room = False
+    print("Stopped monitoring trade room.")
+
 
 # Function to start auto-chat
 def start_auto_chat():
     global is_auto_chatting, item_position
-    chat_text = chat_entry.get()
+    chat_text = chat_entry.get() + "g"  # Automatically append "g"
 
     print("Please Shift + Left-Click the item you want to link in chat.")
     while item_position is None:
@@ -184,6 +259,27 @@ def start_auto_chat():
 
     is_auto_chatting = True
     while is_auto_chatting:
+                # Check for trade request
+        trade_request_location = pyautogui.locateOnScreen('trade_request.jpg', confidence=0.8)
+        if trade_request_location:
+            print("Trade request detected. Stopping auto chat.")
+            yes_location = pyautogui.locateOnScreen('yes.png', confidence=0.8)
+            if yes_location:
+                pyautogui.moveTo(yes_location)
+                pyautogui.click(yes_location)
+                print("Accepted trade request.")
+                time.sleep(3)
+                stash = pyautogui.locateOnScreen('stash.png', confidence=0.8)
+                time.sleep(0.3)
+                pyautogui.moveTo(stash)
+                pyautogui.click(stash)
+                time.sleep(0.3)
+                pyautogui.click(item_position)
+                monitor_trade_room()
+            stop_auto_chat()  # Stop the auto chat
+            return  # Exit the function
+        
+        
         if item_position:
             pyautogui.moveTo(item_position.x, item_position.y)
             time.sleep(0.5)  # Pause for a moment
@@ -219,20 +315,28 @@ def start_auto_chat():
 def stop_auto_chat():
     global is_auto_chatting, item_position  # Declare item_position as global
     is_auto_chatting = False
-    item_position = None  # Reset the item position
+    #item_position = None  # Reset the item position
+    chat_text = None
     print("Stopped auto chat and cleared item position.")
 
 
 # Inside your GUI setup code, add these elements:
+# Function to validate input for only numbers
+def validate_input(P):
+    if P == "" or P.isdigit():
+        return True
+    return False
+
+validate_cmd = root.register(validate_input)
 
 # Label for chat text
-chat_label = Label(root, text="Chat Text:")
+chat_label = Label(root, text="Price:")
 chat_label.pack(pady=5)
 
 # Entry box for chat text
-chat_entry = Entry(root, width=30)
+chat_entry = Entry(root, validate="key", validatecommand=(validate_cmd, '%P'), width=30)
 chat_entry.pack(pady=5)
-chat_entry.insert(0, "50g")  # Default text
+chat_entry.insert(0, "50")  # Default text
 
 # Start auto chat button
 start_chat_button = tk.Button(root, text="Start Auto Chat", command=lambda: threading.Thread(target=start_auto_chat).start())
@@ -241,6 +345,16 @@ start_chat_button.pack(pady=5)
 # Stop auto chat button
 stop_chat_button = tk.Button(root, text="Stop Auto Chat", command=stop_auto_chat)
 stop_chat_button.pack(pady=5)
+
+
+# Start monitoring the trade room in a new thread
+test_button = tk.Button(root, text="Test Trade Room", command=lambda: threading.Thread(target=monitor_trade_room).start())
+test_button.pack(pady=5)
+
+# Stop monitoring the trade room
+stop_monitor_button = tk.Button(root, text="Stop Monitoring Trade Room", command=stop_monitoring_trade_room)
+stop_monitor_button.pack(pady=5)
+
 
 # Bind Shift+Mouse1 to capture the item position
 keyboard.on_press_key('shift', capture_item_position, suppress=False)
