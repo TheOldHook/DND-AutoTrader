@@ -292,11 +292,10 @@ def capture_item_position(e):
     print(f"Captured item position: {item_position}")
     
     
-    
-    
+ 
     
 def monitor_trade_room():
-    global is_monitoring_trade_room
+    global is_monitoring_trade_room, item_position
     is_monitoring_trade_room = True
     while is_monitoring_trade_room:  # Check the flag here
         # Check if you're in a private trading room
@@ -316,6 +315,8 @@ def monitor_trade_room():
                             # Directly put hardcoded coordinates into the debug queue
                 if is_debug_mode:
                     debug_queue.put({'gold_value_location': hardcoded_coordinates})
+                    
+                    
 
                 # Use OCR to read the value
                 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
@@ -342,42 +343,41 @@ def monitor_trade_room():
                     print(f"Gold value region captured: {gold_value_text}")
 
                     entry_value = chat_entry.get()  # Get the value from the Tkinter entry box
-                    #if entry_value == gold_value_text:
-                    if gold_value_text >= entry_value
-                        print("Gold value matches the set entry value. Proceeding to click.")
+                    if entry_value == gold_value_text:  # Convert gold_value_text to integer
+                        print("Gold value matches or is higher than the set entry value. Proceeding to click.")
+                        
                         
                         # Your code to click on an image goes here
                         # For example, locate and click on an "Accept" button
                         accept_button_location = pyautogui.locateOnScreen('greycheck.png', confidence=0.8)
                         if accept_button_location:
                             pyautogui.click(accept_button_location)
-                            time.sleep(3)
+                            time.sleep(5)
                             
-                        pyautogui.click(703, 319)
-                        time.sleep(0.1)
-                        pyautogui.click(752, 328)
-                        time.sleep(0.1)
-                        pyautogui.click(793, 332)
-                        time.sleep(0.1)
-                        pyautogui.click(839, 328)
-                        time.sleep(0.1)
-                        pyautogui.click(706, 375)
-                        time.sleep(0.1)
-                        pyautogui.click(752, 375)
-                        time.sleep(0.1)
-                        pyautogui.click(794, 375)
-                        time.sleep(0.1)
-                        pyautogui.click(842, 375)
-                        time.sleep(0.1)
-                        pyautogui.click(887, 375)
+                            pyautogui.click(703, 319)
+                            time.sleep(0.1)
+                            pyautogui.click(752, 328)
+                            time.sleep(0.1)
+                            pyautogui.click(793, 332)
+                            time.sleep(0.1)
+                            pyautogui.click(839, 328)
+                            time.sleep(0.1)
+                            pyautogui.click(706, 375)
+                            time.sleep(0.1)
+                            pyautogui.click(752, 375)
+                            time.sleep(0.1)
+                            pyautogui.click(794, 375)
+                            time.sleep(0.1)
+                            pyautogui.click(842, 375)
+                            time.sleep(0.1)
+                            pyautogui.click(887, 375)
+                            
+                            time.sleep(1)
                         
-                        time.sleep(1)
-                        
-                        accept_button_location = pyautogui.locateOnScreen('greycheck.png', confidence=0.8)
-                        if accept_button_location:
-                            pyautogui.click(accept_button_location)
-                            time.sleep(3)
-                        
+                            accept_button_location = pyautogui.locateOnScreen('greycheck.png', confidence=0.8)
+                            if accept_button_location:
+                                pyautogui.click(accept_button_location)
+                                time.sleep(3)
 
                     else:
                         print("Gold value does not match the set entry value.")
@@ -418,7 +418,38 @@ def monitor_trade_room():
 
 
                 if gold_value_text:
-                    print(f"Gold value region captured: {gold_value_text}")
+                    print(f"Gold value region captured PHASE 2: {gold_value_text}")
+                    entry_value = chat_entry.get()  # Get the value from the Tkinter entry box
+                    if entry_value == gold_value_text:  # Convert gold_value_text to integer
+                        print("Gold value matches or is higher than the set entry value. Proceeding to click PHASE2")
+                        pyautogui.click(703, 319)
+                        time.sleep(0.1)
+                        pyautogui.click(752, 328)
+                        time.sleep(0.1)
+                        pyautogui.click(793, 332)
+                        time.sleep(0.1)
+                        pyautogui.click(839, 328)
+                        time.sleep(0.1)
+                        pyautogui.click(706, 375)
+                        time.sleep(0.1)
+                        pyautogui.click(752, 375)
+                        time.sleep(0.1)
+                        pyautogui.click(794, 375)
+                        time.sleep(0.1)
+                        pyautogui.click(842, 375)
+                        time.sleep(0.1)
+                        pyautogui.click(887, 375)
+                        
+                        time.sleep(1)
+                        
+                        accept_button_location = pyautogui.locateOnScreen('greycheck.png', confidence=0.8)
+                        if accept_button_location:
+                            pyautogui.click(accept_button_location)
+                            time.sleep(3)
+                    else:
+                        print("Gold value does not match the set entry value.")
+                        #keyboard.press('esc')  # Press the Esc key to stop the trade
+                        #stop_monitoring_trade_room()
                 else:
                     print("No text captured.")
             
@@ -459,8 +490,15 @@ def start_auto_chat():
                 time.sleep(0.3)
                 pyautogui.moveTo(stash)
                 pyautogui.click(stash)
-                time.sleep(1)
-                pyautogui.click(item_position)
+                
+                    # Calculate the new x-coordinate for the trade phase
+                new_trade_x = item_position.x + 318  # 318 is the offset
+                new_trade_position = pyautogui.Point(new_trade_x, item_position.y)
+
+            
+                pyautogui.moveTo(new_trade_position)
+                pyautogui.click(new_trade_position)
+                
                 monitor_trade_room()
             stop_auto_chat()  # Stop the auto chat
             return  # Exit the function
