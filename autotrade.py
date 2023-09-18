@@ -12,6 +12,12 @@ import queue
 import cv2
 import numpy as np
 
+import locale
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')  # Replace 'en_US.UTF-8' with your locale
+
+from tkinter import ttk
+from ttkbootstrap import Style
+
 from tkinter import Entry, Label
 
 
@@ -27,15 +33,15 @@ debug_windows = {}  # Initialize debug_windows here as an empty dictionary
 last_debug_coordinates = {}
 
 
-
 ##################### Debugging start #######################################
 is_debug_mode = False
 debug_window = None
 debug_thread = None
 debug_queue = queue.Queue()
 
+## TKINTER GUI
 
-
+root = tk.Tk()
 
 # Function to read image and extract value
 from PIL import ImageEnhance, ImageFilter
@@ -195,94 +201,6 @@ def stop_trading():
     is_trading = False
     print("Stopped trading.")
 
-def toggle_image_selection(image_path, button):
-    global selected_item_images
-    is_selected = selected_item_images.get(image_path, False)
-    selected_item_images[image_path] = not is_selected
-    if not is_selected:
-        button.config(relief=tk.SUNKEN)  # Indicate the image is selected
-    else:
-        button.config(relief=tk.RAISED)  # Indicate the image is deselected
-    print(f"Toggled selection for {image_path}: {not is_selected}")
-    
-    
-
-def load_item_image():
-    file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg *.png")])
-    if file_path:
-        shutil.copy(file_path, default_folder)
-        refresh_images()
-        
-def refresh_images():
-    global inner_frame
-    for widget in inner_frame.winfo_children():
-        widget.destroy()
-
-    row, col = 0, 0
-    for filename in os.listdir(default_folder):
-        if filename.endswith(('.jpg', '.png')):
-            img_path = os.path.join(default_folder, filename)
-            img = Image.open(img_path)
-            base_width = 100
-            w_percent = base_width / float(img.size[0])
-            h_size = int(float(img.size[1]) * float(w_percent))
-            img = img.resize((base_width, h_size), Image.LANCZOS)
-            img = ImageTk.PhotoImage(img)
-            
-            img_button = tk.Button(inner_frame, image=img, relief=tk.RAISED)
-            img_button.image = img
-            img_button.grid(row=row, column=col)
-            img_button.config(command=lambda img_path=img_path, img_button=img_button: toggle_image_selection(img_path, img_button))
-            
-            col += 1
-            if col > 3:  # 4 images per row
-                col = 0
-                row += 1
-
-
-
-
-
-
-# GUI setup
-root = tk.Tk()
-root.title("DND Trading Bot")
-root.geometry("800x500")
-
-frame = tk.Frame(root)
-frame.pack(side=tk.LEFT, padx=10, pady=10)
-
-canvas = tk.Canvas(frame, width=450)  # Width adjusted to fit the grid
-canvas.pack(side=tk.LEFT)
-
-scrollbar = tk.Scrollbar(frame, orient=tk.VERTICAL, command=canvas.yview)
-scrollbar.pack(side=tk.LEFT, fill=tk.Y)
-
-canvas.config(yscrollcommand=scrollbar.set)
-canvas.bind('<Configure>', lambda e: canvas.config(scrollregion=canvas.bbox('all')))
-
-inner_frame = tk.Frame(canvas)
-canvas.create_window((0, 0), window=inner_frame, anchor=tk.NW)
-
-load_button = tk.Button(root, text="Load Item Image", command=load_item_image)
-load_button.pack(pady=40)  # Moved down by 20px
-
-start_button = tk.Button(root, text="Start Trading", command=lambda: threading.Thread(target=start_trading).start())
-start_button.pack(pady=5)  # 5px gap
-keyboard.add_hotkey('F9', start_trading)
-
-
-stop_button = tk.Button(root, text="Stop Trading", command=stop_trading)
-stop_button.pack(pady=5)  # 5px gap
-keyboard.add_hotkey('F8', stop_trading)
-
-refresh_images()
-
-inner_frame.update_idletasks()
-frame.config(width=inner_frame.winfo_width() + scrollbar.winfo_width(), height=inner_frame.winfo_height())
-canvas.config(scrollregion=canvas.bbox('all'))
-
-
 
 
 # Function to capture the item position
@@ -294,7 +212,7 @@ def capture_item_position(e):
     
  
     
-def monitor_trade_room():
+def monitor_trade_room(chat_entry):
     global is_monitoring_trade_room, item_position
     is_monitoring_trade_room = True
     while is_monitoring_trade_room:  # Check the flag here
@@ -465,7 +383,7 @@ def stop_monitoring_trade_room():
 
 
 # Function to start auto-chat
-def start_auto_chat():
+def start_auto_chat(chat_entry):
     global is_auto_chatting, item_position
     chat_text = chat_entry.get() + "g"  # Automatically append "g"
 
@@ -499,7 +417,7 @@ def start_auto_chat():
                 pyautogui.moveTo(new_trade_position)
                 pyautogui.click(new_trade_position)
                 
-                monitor_trade_room()
+                monitor_trade_room(chat_entry)
             stop_auto_chat()  # Stop the auto chat
             return  # Exit the function
         
@@ -551,40 +469,8 @@ def validate_input(P):
         return True
     return False
 
+
 validate_cmd = root.register(validate_input)
-
-# Label for chat text
-chat_label = Label(root, text="Price:")
-chat_label.pack(pady=5)
-
-# Entry box for chat text
-chat_entry = Entry(root, validate="key", validatecommand=(validate_cmd, '%P'), width=30)
-chat_entry.pack(pady=5)
-chat_entry.insert(0, "50")  # Default text
-
-# Start auto chat button
-start_chat_button = tk.Button(root, text="Start Auto Chat", command=lambda: threading.Thread(target=start_auto_chat).start())
-start_chat_button.pack(pady=5)
-
-# Stop auto chat button
-stop_chat_button = tk.Button(root, text="Stop Auto Chat", command=stop_auto_chat)
-stop_chat_button.pack(pady=5)
-
-
-# Start monitoring the trade room in a new thread
-test_button = tk.Button(root, text="Test Trade Room", command=lambda: threading.Thread(target=monitor_trade_room).start())
-test_button.pack(pady=5)
-
-# Stop monitoring the trade room
-stop_monitor_button = tk.Button(root, text="Stop Monitoring Trade Room", command=stop_monitoring_trade_room)
-stop_monitor_button.pack(pady=5)
-
-debug_button = tk.Button(root, text="Toggle Debug", command=toggle_debug_mode)
-debug_button.pack(pady=5)
-
-# Add a button to your main Tkinter window to trigger this function
-test_button = tk.Button(root, text="Read Test Image", command=read_test_image)
-test_button.pack(pady=5)
 
 
 # Bind Shift+Mouse1 to capture the item position
@@ -593,5 +479,167 @@ keyboard.on_press_key('shift', capture_item_position, suppress=False)
 
 keyboard.add_hotkey('F8', stop_auto_chat)
 
+
+
+
+
+class TradingApp:
+    def __init__(self, master, start_trading_callback, stop_trading_callback, start_auto_chat_callback, stop_auto_chat_callback, monitor_trade_room_callback, stop_monitoring_trade_room_callback, toggle_debug_mode_callback):
+        try:
+            self.master = master
+            self.start_trading_callback = start_trading_callback
+            self.stop_trading_callback = stop_trading_callback
+            self.start_auto_chat_callback = start_auto_chat_callback
+            self.stop_auto_chat_callback = stop_auto_chat_callback
+            self.monitor_trade_room_callback = monitor_trade_room_callback
+            self.stop_monitoring_trade_room_callback = stop_monitoring_trade_room_callback
+            self.toggle_debug_mode_callback = toggle_debug_mode_callback
+
+            self.master.title("The Old Trader")
+            self.master.geometry("800x500")
+
+            # Create themed Tkinter root
+            self.style = Style()
+            self.style.theme_use('cyborg')  # dark theme
+            
+
+            
+            # Create the notebook (tabbed interface)
+            self.notebook = ttk.Notebook(self.master)
+
+            # Create frames for each tab
+            self.tab_auto_sell = ttk.Frame(self.notebook)
+            self.tab_auto_trade = ttk.Frame(self.notebook)
+            self.tab_development = ttk.Frame(self.notebook)
+
+            # Add the frames as tabs to the notebook
+            self.notebook.add(self.tab_auto_sell, text="Auto Sell")
+            self.notebook.add(self.tab_auto_trade, text="Auto Trade")
+            self.notebook.add(self.tab_development, text="Development")
+
+
+
+            self.inner_frame = tk.Frame(self.tab_auto_trade)
+            #
+            self.inner_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+            
+            
+            # Load button for images
+            self.load_button = tk.Button(self.master, text="Load Item Image", command=self.load_item_image)
+            self.load_button.pack(in_=self.tab_auto_trade, pady=5)
+
+            self.refresh_images()
+            
+            
+            keybind_info = (
+                "SHIFT: Capture Item Position\n"
+                "F7: Start Auto Selling\n"
+                "F8: Stop Auto Selling/Trading\n"
+                "F9: Start Auto Trading\n"
+                
+            )
+            keybind_text = tk.Text(self.tab_auto_sell, height=6, width=30, wrap=tk.WORD, relief=tk.GROOVE)
+            keybind_text.insert(tk.END, keybind_info)
+            keybind_text.config(state=tk.DISABLED)  # Make it read-only
+            keybind_text.pack(side=tk.BOTTOM, padx=5, pady=5)
+        
+
+            # Place the notebook on the Tkinter window
+            self.notebook.pack(expand=True, fill='both')
+            
+
+            self.start_button = ttk.Button(self.master, text="Start Trading", command=lambda: threading.Thread(target=self.start_trading_callback).start())
+            self.start_button.pack(in_=self.tab_auto_trade, pady=5)
+
+            self.stop_button = ttk.Button(self.master, text="Stop Trading", command=self.stop_trading_callback)
+            self.stop_button.pack(in_=self.tab_auto_trade, pady=5)
+            
+            self.chat_label = Label(root, text="Sell Price:")
+            self.chat_label.pack(in_=self.tab_auto_sell, pady=(85,5))
+
+            # Entry box for chat text
+            self.chat_entry = ttk.Entry(root, validate="key", validatecommand=(validate_cmd, '%P'), width=30, bootstyle='success')
+            self.chat_entry.pack(in_=self.tab_auto_sell, pady=5)
+            self.chat_entry.insert(0, "50")  # Default text
+
+            keyboard.add_hotkey('F7', start_auto_chat, args=(self.chat_entry,))
+            
+
+            self.start_chat_button = ttk.Button(self.master, text="Start Auto Sell", command=lambda: threading.Thread(target=self.start_auto_chat_callback, args=(self.chat_entry,)).start())
+            self.start_chat_button.pack(in_=self.tab_auto_sell, pady=5)
+
+            self.stop_chat_button = ttk.Button(self.master, text="Stop Auto Sell", command=self.stop_auto_chat_callback)
+            self.stop_chat_button.pack(in_=self.tab_auto_sell, pady=5)
+
+            self.test_button = ttk.Button(self.master, text="Test Trade Room", command=lambda: threading.Thread(target=self.monitor_trade_room_callback).start())
+            self.test_button.pack(in_=self.tab_development, pady=5)
+
+            self.stop_monitor_button = ttk.Button(self.master, text="Stop Monitoring Trade Room", command=self.stop_monitoring_trade_room_callback)
+            self.stop_monitor_button.pack(in_=self.tab_development, pady=5)
+
+            self.debug_button = ttk.Button(self.master, text="Toggle Debug", command=self.toggle_debug_mode_callback)
+            self.debug_button.pack(in_=self.tab_development, pady=5)
+            
+        except Exception as e:
+            print(e)
+
+            # More widgets and initialization code here...
+    def refresh_images(self):
+            for widget in self.inner_frame.winfo_children():
+                widget.destroy()
+
+            row, col = 0, 0
+            for filename in os.listdir(default_folder):
+                if filename.endswith(('.jpg', '.png')):
+                    img_path = os.path.join(default_folder, filename)
+                    img = Image.open(img_path)
+                    base_width = 100
+                    w_percent = base_width / float(img.size[0])
+                    h_size = int(float(img.size[1]) * float(w_percent))
+                    img = img.resize((base_width, h_size), Image.LANCZOS)
+                    img = ImageTk.PhotoImage(img)
+
+                    img_button = tk.Button(self.inner_frame, image=img, relief=tk.RAISED)
+                    img_button.image = img
+                    img_button.grid(row=row, column=col)
+                    img_button.config(command=lambda img_path=img_path, img_button=img_button: self.toggle_image_selection(img_path, img_button))
+
+                    col += 1
+                    if col > 7:  # 4 images per row
+                        col = 0
+                        row += 1
+
+    def load_item_image(self):
+        file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg *.png")])
+        if file_path:
+            shutil.copy(file_path, default_folder)
+            self.refresh_images()
+            
+            
+    def toggle_image_selection(self, image_path, button):
+        global selected_item_images  # If this variable is not class-wide, consider making it an instance variable.
+        is_selected = selected_item_images.get(image_path, False)
+        selected_item_images[image_path] = not is_selected
+        if not is_selected:
+            button.config(relief=tk.SUNKEN)  # Indicate the image is selected
+        else:
+            button.config(relief=tk.RAISED)  # Indicate the image is deselected
+        print(f"Toggled selection for {image_path}: {not is_selected}")
+
+
+
+app = TradingApp(
+    root, 
+    start_trading, 
+    stop_trading, 
+    start_auto_chat, 
+    stop_auto_chat, 
+    monitor_trade_room, 
+    stop_monitoring_trade_room,
+    toggle_debug_mode
+)
+
+
 root.after(100, check_queue)
 root.mainloop()
+
