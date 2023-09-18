@@ -533,10 +533,7 @@ class TradingApp:
             
             keybind_info = (
                 "SHIFT: Capture Item Position\n"
-                "F7: Start Auto Selling\n"
                 "F8: Stop Auto Selling/Trading\n"
-                "F9: Start Auto Trading\n"
-                
             )
             keybind_text = tk.Text(self.tab_auto_sell, height=6, width=30, wrap=tk.WORD, relief=tk.GROOVE)
             keybind_text.insert(tk.END, keybind_info)
@@ -562,7 +559,7 @@ class TradingApp:
             self.chat_entry.pack(in_=self.tab_auto_sell, pady=5)
             self.chat_entry.insert(0, "50")  # Default text
 
-            keyboard.add_hotkey('F7', start_auto_chat, args=(self.chat_entry,))
+            #keyboard.add_hotkey('F7', start_auto_chat, args=(self.chat_entry,))
             
 
             self.start_chat_button = ttk.Button(self.master, text="Start Auto Sell", command=lambda: threading.Thread(target=self.start_auto_chat_callback, args=(self.chat_entry,)).start())
