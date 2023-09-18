@@ -39,7 +39,11 @@ debug_window = None
 debug_thread = None
 debug_queue = queue.Queue()
 
-## TKINTER GUI
+## 
+global successful_sales, total_gold
+successful_sales = 0
+total_gold = 0
+
 
 root = tk.Tk()
 
@@ -213,7 +217,9 @@ def capture_item_position(e):
  
     
 def monitor_trade_room(chat_entry):
-    global is_monitoring_trade_room, item_position
+    global is_monitoring_trade_room, item_position 
+    global successful_sales, total_gold
+
     is_monitoring_trade_room = True
     while is_monitoring_trade_room:  # Check the flag here
         # Check if you're in a private trading room
@@ -296,6 +302,10 @@ def monitor_trade_room(chat_entry):
                             if accept_button_location:
                                 pyautogui.click(accept_button_location)
                                 time.sleep(3)
+                                successful_sales += 1
+                                total_gold += int(entry_value)
+                                app.update_ui(successful_sales, total_gold)
+
 
                     else:
                         print("Gold value does not match the set entry value.")
@@ -486,6 +496,14 @@ keyboard.add_hotkey('F8', stop_auto_chat)
 class TradingApp:
     def __init__(self, master, start_trading_callback, stop_trading_callback, start_auto_chat_callback, stop_auto_chat_callback, monitor_trade_room_callback, stop_monitoring_trade_room_callback, toggle_debug_mode_callback):
         try:
+            
+            ## DATA 
+            self.successful_sales_var = tk.StringVar(value='Successful Sales: 0')  # Add initial value
+            self.total_gold_var = tk.StringVar(value='Total Session Gold: 0')  # Add initial value
+
+            ## DATA END
+            
+            
             self.master = master
             self.start_trading_callback = start_trading_callback
             self.stop_trading_callback = stop_trading_callback
@@ -567,6 +585,13 @@ class TradingApp:
 
             self.stop_chat_button = ttk.Button(self.master, text="Stop Auto Sell", command=self.stop_auto_chat_callback)
             self.stop_chat_button.pack(in_=self.tab_auto_sell, pady=5)
+            
+            self.successful_sales_label = Label(self.tab_auto_sell, textvariable=self.successful_sales_var)
+            self.successful_sales_label.pack(pady=(20, 5))
+
+            self.total_gold_label = Label(self.tab_auto_sell, textvariable=self.total_gold_var)
+            self.total_gold_label.pack(pady=(20, 5))
+
 
             self.test_button = ttk.Button(self.master, text="Test Trade Room", command=lambda: threading.Thread(target=self.monitor_trade_room_callback).start())
             self.test_button.pack(in_=self.tab_development, pady=5)
@@ -622,6 +647,12 @@ class TradingApp:
         else:
             button.config(relief=tk.RAISED)  # Indicate the image is deselected
         print(f"Toggled selection for {image_path}: {not is_selected}")
+        
+        
+        # Create a method to update the UI
+    def update_ui(self, successful_sales, total_gold):
+        self.successful_sales_var.set(f"Successful Sales: {successful_sales}")
+        self.total_gold_var.set(f"Total Gold: {total_gold}")
 
 
 
