@@ -33,6 +33,9 @@ debug_windows = {}  # Initialize debug_windows here as an empty dictionary
 last_debug_coordinates = {}
 
 
+# For dropdown menus
+class_list = ["Fighter", "Wizard", "Ranger", "Rogue", "Cleric", "Bard", "Barbarian", "Warlock", "Utility"]
+
 ##################### Debugging start #######################################
 is_debug_mode = False
 debug_window = None
@@ -208,10 +211,30 @@ def stop_trading():
 
 
 # Function to capture the item position
-def capture_item_position(e):
-    global item_position
-    item_position = pyautogui.position()
-    print(f"Captured item position: {item_position}")
+def capture_item_position(self, e):
+    global item_position  # Declare it as global so you can modify it
+    position = pyautogui.position()
+    print(f"Captured item position: {position}")
+
+    # If Multi-Sell is selected
+    if self.sell_option_var.get() == '2':
+        new_entry = {
+            "Position": position,
+            "Item": "Gear",
+            "Class": "Ranger",
+            "Price": "100",
+            "Status": ""
+        }
+        self.multi_item_positions.append(new_entry)
+        # Update the table in the GUI here (you'd fill this in)
+        self.update_table()  # Update the table in the GUI
+
+        
+    # If Single-Sell is selected
+    else:
+        item_position = position
+
+
     
     
  
@@ -483,19 +506,24 @@ def validate_input(P):
 validate_cmd = root.register(validate_input)
 
 
-# Bind Shift+Mouse1 to capture the item position
-keyboard.on_press_key('shift', capture_item_position, suppress=False)
-
-
+# Keybindings
+#keyboard.on_press_key('shift', capture_item_position, suppress=False)
 keyboard.add_hotkey('F8', stop_auto_chat)
 
 
+def start_multi_sell():
+    print("Starting multi selling...")
+    
 
 
+
+from tkinter import Canvas, Scrollbar
 
 class TradingApp:
-    def __init__(self, master, start_trading_callback, stop_trading_callback, start_auto_chat_callback, stop_auto_chat_callback, monitor_trade_room_callback, stop_monitoring_trade_room_callback, toggle_debug_mode_callback):
+    def __init__(self, master, start_trading_callback, stop_trading_callback, start_auto_chat_callback, stop_auto_chat_callback, monitor_trade_room_callback, stop_monitoring_trade_room_callback, toggle_debug_mode_callback, start_multi_sell):
         try:
+            
+            self.multi_item_positions = []
             
             ## DATA 
             self.successful_sales_var = tk.StringVar(value='Successful Sales: 0')  # Add initial value
@@ -508,13 +536,15 @@ class TradingApp:
             self.start_trading_callback = start_trading_callback
             self.stop_trading_callback = stop_trading_callback
             self.start_auto_chat_callback = start_auto_chat_callback
+            self.start_multi_chat_callback = start_multi_sell
+
             self.stop_auto_chat_callback = stop_auto_chat_callback
             self.monitor_trade_room_callback = monitor_trade_room_callback
             self.stop_monitoring_trade_room_callback = stop_monitoring_trade_room_callback
             self.toggle_debug_mode_callback = toggle_debug_mode_callback
 
             self.master.title("The Old Trader")
-            self.master.geometry("800x500")
+            self.master.geometry("900x500")
 
             # Create themed Tkinter root
             self.style = Style()
@@ -535,7 +565,18 @@ class TradingApp:
             self.notebook.add(self.tab_auto_trade, text="Auto Trade")
             self.notebook.add(self.tab_development, text="Development")
 
-
+            frame1 = tk.Frame(self.tab_auto_sell)
+            frame2 = tk.Frame(self.tab_auto_sell)
+            frame3 = tk.Frame(self.tab_auto_sell)
+            
+            frame1.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+            frame2.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
+            frame3.grid(row=0, column=2, sticky="nsew", padx=5, pady=5)
+            
+            self.tab_auto_sell.grid_columnconfigure(0, weight=1)
+            self.tab_auto_sell.grid_columnconfigure(1, weight=1)
+            self.tab_auto_sell.grid_columnconfigure(2, weight=3)
+            
 
             self.inner_frame = tk.Frame(self.tab_auto_trade)
             #
@@ -549,6 +590,52 @@ class TradingApp:
             self.refresh_images()
             
             
+            # Customize the font
+            custom_font = ("Helvetica", 16, "bold")
+
+            # For frame1
+            frame1_header = ttk.Label(frame1, text="Settings", font=custom_font)
+            frame1_header.pack(side=tk.TOP, padx=5, pady=5)
+
+            # For frame2
+            frame2_header = ttk.Label(frame2, text="Single-Sell", font=custom_font)
+            frame2_header.pack(side=tk.TOP, padx=5, pady=5)
+            
+            # Create the Clear button
+            self.clear_button = ttk.Button(
+                frame3, 
+                text="Clear List", 
+                command=self.clear_table  # Set the command to the function to clear the list and update the table
+            )
+            self.clear_button.pack(side=tk.BOTTOM, pady=5)
+
+            # Set the background and text color to red
+            self.clear_button.config(
+                style="clear.TButton"
+            )
+
+            # Create a style for the red button
+            self.style.configure("clear.TButton",
+                                foreground="white",
+                                background="red")
+            
+            # For frame3
+            frame3_header = ttk.Label(frame3, text="Multi-Sell", font=custom_font, anchor="center", justify="center")
+            frame3_header.pack(side=tk.TOP, padx=50, pady=5)
+            
+            # Create a variable to hold the selected option
+            self.sell_option_var = tk.StringVar(value='1')  # Default to 
+
+            # Create the radio buttons
+
+            single_sell_radio = ttk.Radiobutton(frame1, text='Single-Sell', variable=self.sell_option_var, value='1')
+            multi_sell_radio = ttk.Radiobutton(frame1, text='Multi-Sell', variable=self.sell_option_var, value='2')
+            
+            # Place the radio buttons in frame1
+            multi_sell_radio.pack(side=tk.TOP, padx=5, pady=5)
+            single_sell_radio.pack(side=tk.TOP, padx=5, pady=5)
+
+            
             keybind_info = (
                 "SHIFT: Capture Item Position\n"
                 "F8: Stop Auto Selling/Trading\n"
@@ -556,7 +643,7 @@ class TradingApp:
             keybind_text = tk.Text(self.tab_auto_sell, height=6, width=30, wrap=tk.WORD, relief=tk.GROOVE)
             keybind_text.insert(tk.END, keybind_info)
             keybind_text.config(state=tk.DISABLED)  # Make it read-only
-            keybind_text.pack(side=tk.BOTTOM, padx=5, pady=5)
+            keybind_text.pack(in_=frame1, padx=5, pady=5)
         
 
             # Place the notebook on the Tkinter window
@@ -570,27 +657,95 @@ class TradingApp:
             self.stop_button.pack(in_=self.tab_auto_trade, pady=5)
             
             self.chat_label = Label(root, text="Sell Price:")
-            self.chat_label.pack(in_=self.tab_auto_sell, pady=(85,5))
+            self.chat_label.pack(in_=frame2, pady=(85,5))
 
             # Entry box for chat text
             self.chat_entry = ttk.Entry(root, validate="key", validatecommand=(validate_cmd, '%P'), width=30, bootstyle='success')
-            self.chat_entry.pack(in_=self.tab_auto_sell, pady=5)
-            self.chat_entry.insert(0, "50")  # Default text
+            self.chat_entry.pack(in_=frame2, pady=5)
+            self.chat_entry.insert(0, "100")  # Default text
 
             #keyboard.add_hotkey('F7', start_auto_chat, args=(self.chat_entry,))
             
 
-            self.start_chat_button = ttk.Button(self.master, text="Start Auto Sell", command=lambda: threading.Thread(target=self.start_auto_chat_callback, args=(self.chat_entry,)).start())
-            self.start_chat_button.pack(in_=self.tab_auto_sell, pady=5)
+            def start_sell_thread():
+                if self.sell_option_var.get() == '1':
+                    threading.Thread(target=self.start_auto_chat_callback, args=(self.chat_entry,)).start()
+                else:
+                    threading.Thread(target=self.start_multi_chat_callback).start()
+
+            self.start_chat_button = ttk.Button(
+                self.master, 
+                text="Start Auto Sell", 
+                command=start_sell_thread
+            )
+            self.start_chat_button.pack(in_=frame2, pady=5)
 
             self.stop_chat_button = ttk.Button(self.master, text="Stop Auto Sell", command=self.stop_auto_chat_callback)
-            self.stop_chat_button.pack(in_=self.tab_auto_sell, pady=5)
+            self.stop_chat_button.pack(in_=frame2, pady=5)
+            
             
             self.successful_sales_label = Label(self.tab_auto_sell, textvariable=self.successful_sales_var)
-            self.successful_sales_label.pack(pady=(20, 5))
+            self.successful_sales_label.pack(in_=frame2, pady=(20, 5))
 
             self.total_gold_label = Label(self.tab_auto_sell, textvariable=self.total_gold_var)
-            self.total_gold_label.pack(pady=(20, 5))
+            self.total_gold_label.pack(in_=frame2, pady=(20, 5))
+            
+            ## TABLE ##
+            
+            # Create canvas and scrollbar
+            self.canvas = tk.Canvas(frame3, height=int(frame3.winfo_height() * 0.6))
+            scrollbar = ttk.Scrollbar(frame3, orient="vertical", command=self.canvas.yview)
+            self.canvas.configure(yscrollcommand=scrollbar.set)
+
+            scrollbar.pack(side="right", fill="y")
+            self.canvas.pack(side="left", fill="both", expand=True)
+
+            self.table_frame = tk.Frame(self.canvas)
+            self.canvas.create_window((0, 0), window=self.table_frame, anchor="nw")
+
+            self.table_frame.update_idletasks()
+            self.canvas.config(scrollregion=self.canvas.bbox("all"))
+            
+            
+            # Add table headers
+            tk.Label(self.table_frame, text="Item", width=20, borderwidth=2, relief="solid").grid(row=0, column=0)
+            tk.Label(self.table_frame, text="Class", width=10, borderwidth=2, relief="solid").grid(row=0, column=1)
+            tk.Label(self.table_frame, text="Price", width=10, borderwidth=2, relief="solid").grid(row=0, column=2)
+            tk.Label(self.table_frame, text="Status", width=10, borderwidth=2, relief="solid").grid(row=0, column=3)
+            
+            # Sample data for the table
+            data = [
+                {"Item": "Apple", "Class": "Ranger", "Price": 50, "Status": "Sold"},
+                {"Item": "Apple", "Class": "Ranger", "Price": 50, "Status": "Selling"},
+                # ... add more items here
+            ]
+            
+
+
+            # Loop through rows to create table widgets
+            for i, row_data in enumerate(self.multi_item_positions, start=1):
+                tk.Label(self.table_frame, text=row_data["Item"], width=20, borderwidth=2, relief="solid").grid(row=i, column=0)
+
+                # Dropdown menu for 'Class' column
+                class_var = tk.StringVar(value=row_data["Class"])
+                class_menu = ttk.OptionMenu(self.table_frame, class_var, *class_list)
+                class_menu.grid(row=i, column=1)
+                class_var.trace_add('write', lambda *args, i=i: update_row_value(i, 'Class', class_var))
+
+                # Editable entry for 'Price' column
+                price_var = tk.StringVar(value=row_data["Price"])
+                price_entry = tk.Entry(self.table_frame, width=10, textvariable=price_var)
+                price_entry.grid(row=i, column=2)
+                price_var.trace_add('write', lambda *args, i=i: update_row_value(i, 'Price', price_var))
+
+                tk.Label(self.table_frame, text=row_data["Status"], width=10, borderwidth=2, relief="solid").grid(row=i, column=3)
+            
+            self.table_frame.update_idletasks()
+            #canvas.config(scrollregion=canvas.bbox("all"))
+
+            
+            
+            
 
 
             self.test_button = ttk.Button(self.master, text="Test Trade Room", command=lambda: threading.Thread(target=self.monitor_trade_room_callback).start())
@@ -602,6 +757,8 @@ class TradingApp:
             self.debug_button = ttk.Button(self.master, text="Toggle Debug", command=self.toggle_debug_mode_callback)
             self.debug_button.pack(in_=self.tab_development, pady=5)
             
+            
+
         except Exception as e:
             print(e)
 
@@ -654,6 +811,64 @@ class TradingApp:
         self.successful_sales_var.set(f"Successful Sales: {successful_sales}")
         self.total_gold_var.set(f"Total Gold: {total_gold}")
 
+    def update_table(self):
+        print("Updating table...")
+        print(f"Data: {self.multi_item_positions}")
+
+        # Clear existing widgets in the table frame
+        for widget in self.table_frame.winfo_children():
+            widget.destroy()
+
+        # Recreate headers
+        tk.Label(self.table_frame, text="Item", width=20, borderwidth=2, relief="solid").grid(row=0, column=0)
+        tk.Label(self.table_frame, text="Class", width=10, borderwidth=2, relief="solid").grid(row=0, column=1)
+        tk.Label(self.table_frame, text="Price", width=10, borderwidth=2, relief="solid").grid(row=0, column=2)
+        tk.Label(self.table_frame, text="Status", width=10, borderwidth=2, relief="solid").grid(row=0, column=3)
+
+        # Recreate the table
+        for i, row_data in enumerate(self.multi_item_positions, start=1):
+            print(f"Adding row {i} with data {row_data}")
+
+            tk.Label(self.table_frame, text=row_data["Item"], width=20, borderwidth=2, relief="solid").grid(row=i, column=0)
+
+            # Dropdown for 'Class' column
+            class_var = tk.StringVar(value=row_data["Class"])
+            class_menu = ttk.OptionMenu(self.table_frame, class_var, *class_list)
+            class_menu.grid(row=i, column=1)
+            class_var.trace_add('write', lambda *args, i=i: self.update_row_value(i, 'Class', class_var))
+
+            # Editable entry for 'Price' column
+            price_var = tk.StringVar(value=row_data["Price"])
+            price_entry = tk.Entry(self.table_frame, width=10, textvariable=price_var)
+            price_entry.grid(row=i, column=2)
+            price_var.trace_add('write', lambda *args, i=i: self.update_row_value(i, 'Price', price_var))
+
+            tk.Label(self.table_frame, text=row_data["Status"], width=10, borderwidth=2, relief="solid").grid(row=i, column=3)
+
+        # Update the canvas scroll region
+        self.table_frame.update_idletasks()
+        self.canvas.config(scrollregion=self.canvas.bbox("all"))
+
+        print("Table updated.")
+
+    def clear_table(self):
+        self.multi_item_positions.clear()  # Clear the list
+        self.update_table()  # Update the table to reflect the changes
+        print("Table cleared.")
+
+
+    # A function to update the class and price when changed
+    def update_row_value(self, i, key, var):
+        new_value = var.get()
+        if 0 <= i < len(self.multi_item_positions):
+            self.multi_item_positions[i][key] = new_value
+            print(f"Updated row {i + 1}, {key} to {new_value}")
+            print(f"Current state of multi_item_positions: {self.multi_item_positions}")
+        else:
+            print(f"Invalid index: {i}")
+
+
+
 
 
 app = TradingApp(
@@ -664,9 +879,12 @@ app = TradingApp(
     stop_auto_chat, 
     monitor_trade_room, 
     stop_monitoring_trade_room,
-    toggle_debug_mode
+    toggle_debug_mode,
+    start_multi_sell
 )
 
+# Keybinding to capture item positions
+keyboard.on_press_key('shift', lambda e, app=app: capture_item_position(app, e), suppress=False)
 
 root.after(100, check_queue)
 root.mainloop()
