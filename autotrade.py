@@ -628,7 +628,7 @@ class TradingApp:
 
             self.master.title("The Old Trader")
             self.master.geometry("1000x450")
-            self.master.resizable(False, False)
+            #self.master.resizable(False, False)
 
 
             # Create themed Tkinter root
