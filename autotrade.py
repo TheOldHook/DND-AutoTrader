@@ -627,7 +627,9 @@ class TradingApp:
             self.toggle_debug_mode_callback = toggle_debug_mode_callback
 
             self.master.title("The Old Trader")
-            self.master.geometry("1000x500")
+            self.master.geometry("1000x450")
+            self.master.resizable(False, False)
+
 
             # Create themed Tkinter root
             self.style = Style()
@@ -825,7 +827,7 @@ class TradingApp:
                 price_entry.grid(row=i, column=2)
                 price_var.trace_add('write', lambda *args, i=i: self.update_row_value(i, 'Price', price_var))
 
-                tk.Label(self.table_frame, text=row_data["Status"], width=10, borderwidth=2, relief="solid").grid(row=i, column=3)
+                tk.Label(self.table_frame, text=row_data["Status"], width=10, borderwidth=1, relief="solid").grid(row=i, column=3)
             
             self.table_frame.update_idletasks()
             #canvas.config(scrollregion=canvas.bbox("all"))
@@ -903,16 +905,16 @@ class TradingApp:
             widget.destroy()
 
         # Recreate headers
-        tk.Label(self.table_frame, text="Item", width=20, borderwidth=2, relief="solid").grid(row=0, column=0)
-        tk.Label(self.table_frame, text="Class", width=10, borderwidth=2, relief="solid").grid(row=0, column=1)
-        tk.Label(self.table_frame, text="Price", width=10, borderwidth=2, relief="solid").grid(row=0, column=2)
-        tk.Label(self.table_frame, text="Status", width=10, borderwidth=2, relief="solid").grid(row=0, column=3)
+        tk.Label(self.table_frame, text="Item", width=16, borderwidth=1, relief="solid").grid(row=0, column=0)
+        tk.Label(self.table_frame, text="Class", width=16, borderwidth=1, relief="solid").grid(row=0, column=1)
+        tk.Label(self.table_frame, text="Price", width=16, borderwidth=1, relief="solid").grid(row=0, column=2)
+        tk.Label(self.table_frame, text="Status", width=16, borderwidth=1, relief="solid").grid(row=0, column=3)
 
         # Recreate the table
         for i, row_data in enumerate(self.multi_item_positions, start=1):
             print(f"Adding row {i} with data {row_data}")
             
-            tk.Label(self.table_frame, text=row_data["Item"], width=20, borderwidth=2, relief="solid").grid(row=i, column=0)
+            tk.Label(self.table_frame, text=row_data["Item"], width=16, borderwidth=1, relief="solid").grid(row=i, column=0)
 
 
             # Dropdown for 'Class' column
@@ -922,20 +924,20 @@ class TradingApp:
             class_var.set(row_data["Class"])
 
             class_menu = ttk.OptionMenu(self.table_frame, class_var, row_data["Class"], *class_list)
-            class_menu.grid(row=i, column=1)
+            class_menu.grid(row=i, column=1, padx=5, pady=5)
 
             # Use row_data["RowId"] directly
             class_var.trace_add('write', lambda *args, class_var=class_var, row_data=row_data: self.update_row_value(row_data["RowId"], 'Class', class_var))
 
             # Editable entry for 'Price' column
             price_var = tk.StringVar(value=row_data["Price"])
-            price_entry = tk.Entry(self.table_frame, width=10, textvariable=price_var)
+            price_entry = tk.Entry(self.table_frame, width=15, textvariable=price_var)
             price_entry.grid(row=i, column=2)
 
             # Use row_data["RowId"] directly
             price_var.trace_add('write', lambda *args, price_var=price_var, row_data=row_data: self.update_row_value(row_data["RowId"], 'Price', price_var))
 
-            tk.Label(self.table_frame, text=row_data["Status"], width=10, borderwidth=2, relief="solid").grid(row=i, column=3)
+            tk.Label(self.table_frame, text=row_data["Status"], width=16, borderwidth=1, relief="solid").grid(row=i, column=3)
             
 
         # Update the canvas scroll region
