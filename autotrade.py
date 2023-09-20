@@ -647,9 +647,12 @@ class TradingApp:
             self.notebook.add(self.tab_auto_sell, text="Auto Sell")
             self.notebook.add(self.tab_auto_trade, text="Auto Trade")
             self.notebook.add(self.tab_development, text="Development")
+            
+            
 
-            frame1 = tk.Frame(self.tab_auto_sell)
-            frame2 = tk.Frame(self.tab_auto_sell)
+            frame1 = tk.Frame(self.tab_auto_sell, borderwidth=2, relief="groove")
+
+            frame2 = tk.Frame(self.tab_auto_sell, borderwidth=2, relief="groove")
             frame3 = tk.Frame(self.tab_auto_sell)
             
             frame1.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
@@ -789,10 +792,10 @@ class TradingApp:
             
             
             # Add table headers
-            tk.Label(self.table_frame, text="Item", width=20, borderwidth=2, relief="solid").grid(row=0, column=0)
-            tk.Label(self.table_frame, text="Class", width=10, borderwidth=2, relief="solid").grid(row=0, column=1)
-            tk.Label(self.table_frame, text="Price", width=10, borderwidth=2, relief="solid").grid(row=0, column=2)
-            tk.Label(self.table_frame, text="Status", width=10, borderwidth=2, relief="solid").grid(row=0, column=3)
+            tk.Label(self.table_frame, text="Item", width=16, borderwidth=1, relief="solid").grid(row=0, column=0)
+            tk.Label(self.table_frame, text="Class", width=16, borderwidth=1, relief="solid").grid(row=0, column=1)
+            tk.Label(self.table_frame, text="Price", width=16, borderwidth=1, relief="solid").grid(row=0, column=2)
+            tk.Label(self.table_frame, text="Status", width=16, borderwidth=1, relief="solid").grid(row=0, column=3)
             
             # Sample data for the table
             data = [
