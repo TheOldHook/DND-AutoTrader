@@ -511,8 +511,73 @@ validate_cmd = root.register(validate_input)
 keyboard.add_hotkey('F8', stop_auto_chat)
 
 
-def start_multi_sell():
+def goto_class(item_class):
+    print("Class:", item_class)
+    print("Navigating to class trade chat...")
+    if item_class == "Fighter":
+        print("Navigating to Fighter trade chat...")
+        #pyautogui.click(100, 100)
+    elif item_class ==  "Wizard":
+        print("Navigating to Wizard trade chat...")
+        #pyautogui.click(200, 200)
+    elif item_class ==  "Ranger":
+        print("Navigating to Ranger trade chat...")
+        #pyautogui.click(300, 300)
+    elif item_class ==  "Rogue":
+        print("Navigating to Rogue trade chat...")
+        #pyautogui.click(400, 400)
+    elif item_class ==  "Cleric":
+        print("Navigating to Cleric trade chat...")
+        #pyautogui.click(500, 500)
+    elif item_class ==  "Bard":
+        print("Navigating to Bard trade chat...")
+        #pyautogui.click(600, 600)
+    elif item_class ==  "Barbarian":
+        print("Navigating to Barbarian trade chat...")
+        #pyautogui.click(700, 700)
+    elif item_class ==  "Warlock":
+        print("Navigating to Warlock trade chat...")
+        #pyautogui.click(800, 800)
+    elif item_class ==  "Utility":
+        print("Navigating to Utility trade chat...")
+        #pyautogui.click(900, 900)
+    elif item_class ==  "Default":
+        print("Navigating to Default trade chat...")
+        #pyautogui.click(1000, 1000)
+    
+def start_multi_sell(table_data):
     print("Starting multi selling...")
+    print("Data:", table_data)
+    
+    for row in table_data:
+        row_id = row['RowId']
+        position = row['Position']
+        item = row['Item']
+        item_class = row['Class']
+        price = row['Price']
+        status = row['Status']
+
+        # Skip if already sold
+        if status == 'Sold':
+            print(f"Skipping Row ID: {row_id}, Status: Sold")
+            continue  # Skip to the next iteration
+
+        # Update status to 'Processing..'
+        row['Status'] = 'Processing..'
+        print(f"Processing Row ID: {row_id}, Status: {row['Status']}")
+        
+        # Your selling logic here, for example:
+        # 1. Navigate to the position on screen to click on the item (use the 'position' variable)
+        # 2. Input the item's class and price to sell it (use 'item_class' and 'price' variables)
+        goto_class(item_class)
+        
+        # Update status to 'Sold'
+        row['Status'] = 'Sold'
+        print(f"Item {item} from class {item_class} priced at {price} has been processed. Status: {row['Status']}")
+
+
+
+
     
 
 
@@ -526,7 +591,7 @@ class TradingApp:
             self.multi_item_positions = []
             self.class_vars = []
             self.selected_class_values = {}
-
+            self.current_status_dict = {}
             
             ## DATA 
             self.successful_sales_var = tk.StringVar(value='Successful Sales: 0')  # Add initial value
@@ -674,7 +739,8 @@ class TradingApp:
                 if self.sell_option_var.get() == '1':
                     threading.Thread(target=self.start_auto_chat_callback, args=(self.chat_entry,)).start()
                 else:
-                    threading.Thread(target=self.start_multi_chat_callback).start()
+                    threading.Thread(target=self.start_multi_chat_callback, args=(self.multi_item_positions,)).start()
+
 
             self.start_chat_button = ttk.Button(
                 self.master, 
@@ -830,6 +896,9 @@ class TradingApp:
         # Recreate the table
         for i, row_data in enumerate(self.multi_item_positions, start=1):
             print(f"Adding row {i} with data {row_data}")
+            
+            tk.Label(self.table_frame, text=row_data["Item"], width=20, borderwidth=2, relief="solid").grid(row=i, column=0)
+
 
             # Dropdown for 'Class' column
             class_var = tk.StringVar()  # Create the StringVar without an initial value
@@ -852,6 +921,7 @@ class TradingApp:
             price_var.trace_add('write', lambda *args, price_var=price_var, row_data=row_data: self.update_row_value(row_data["RowId"], 'Price', price_var))
 
             tk.Label(self.table_frame, text=row_data["Status"], width=10, borderwidth=2, relief="solid").grid(row=i, column=3)
+            
 
         # Update the canvas scroll region
         self.table_frame.update_idletasks()
@@ -873,8 +943,8 @@ class TradingApp:
         for i, row_data in enumerate(self.multi_item_positions):
             if row_data["RowId"] == row_id:
                 row_data[key] = new_value
-                print(f"Updated row {i + 1}, {key} to {new_value}")
-                print(f"Current state of multi_item_positions: {self.multi_item_positions}")
+                #print(f"Updated row {i + 1}, {key} to {new_value}")
+                #print(f"Current state of multi_item_positions: {self.multi_item_positions}")
                 break  # Exit the loop once the row is found
 
 
