@@ -527,31 +527,31 @@ def goto_class(item_class):
     #print("Navigating to class trade chat...")
     if item_class == "Fighter":
         print("Navigating to Fighter trade chat...")
-        #pyautogui.click(100, 100)
+        #pyautogui.click(1193, 287)
     elif item_class ==  "Wizard":
         print("Navigating to Wizard trade chat...")
-        #pyautogui.click(200, 200)
+        #pyautogui.click(1205, 595)
     elif item_class ==  "Ranger":
         print("Navigating to Ranger trade chat...")
-        #pyautogui.click(300, 300)
+        #pyautogui.click(1188, 520)
     elif item_class ==  "Rogue":
         print("Navigating to Rogue trade chat...")
-        #pyautogui.click(400, 400)
+        #pyautogui.click(1190, 444)
     elif item_class ==  "Cleric":
         print("Navigating to Cleric trade chat...")
-        #pyautogui.click(500, 500)
+        #pyautogui.click(1193, 664)
     elif item_class ==  "Bard":
         print("Navigating to Bard trade chat...")
-        #pyautogui.click(600, 600)
+        #pyautogui.click(1184, 752)
     elif item_class ==  "Barbarian":
         print("Navigating to Barbarian trade chat...")
-        #pyautogui.click(700, 700)
+        #pyautogui.click(1188, 367)
     elif item_class ==  "Warlock":
         print("Navigating to Warlock trade chat...")
         #pyautogui.click(800, 800)
     elif item_class ==  "Utility":
         print("Navigating to Utility trade chat...")
-        #pyautogui.click(900, 900)
+        #pyautogui.click(1185, 946)
     elif item_class ==  "Default":
         print("Navigating to Default trade chat...")
         #pyautogui.click(1000, 1000)
