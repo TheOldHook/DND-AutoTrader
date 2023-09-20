@@ -6,7 +6,7 @@
 # The Old Trader - Dark And Darker - Auto Trader
 
 <p align="center">
-  <img src="./icons/autosell.jpg">
+  <img src="./image_locations/header.png">
 </p>
 
 
