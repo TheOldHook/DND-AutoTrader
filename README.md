@@ -5,7 +5,9 @@
 
 # The Old Trader - Dark And Darker - Auto Trader
 
-
+<p align="center">
+  <img src="./icons/autosell.jpg">
+</p>
 
 
 Welcome to The Old Trader - Dark And Darker - Auto Trader, an automated trading and selling tool for your favorite online game! This Python-based application simplifies the trading process and makes your in-game life easier.
