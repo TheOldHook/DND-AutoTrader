@@ -11,6 +11,7 @@ import pytesseract
 import queue
 import cv2
 import numpy as np
+import uuid
 
 import locale
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')  # Replace 'en_US.UTF-8' with your locale
@@ -34,7 +35,7 @@ last_debug_coordinates = {}
 
 
 # For dropdown menus
-class_list = ["Fighter", "Wizard", "Ranger", "Rogue", "Cleric", "Bard", "Barbarian", "Warlock", "Utility"]
+class_list = ["Fighter", "Wizard", "Ranger", "Rogue", "Cleric", "Bard", "Barbarian", "Warlock", "Utility", "Default"]
 
 ##################### Debugging start #######################################
 is_debug_mode = False
@@ -215,24 +216,23 @@ def capture_item_position(self, e):
     global item_position  # Declare it as global so you can modify it
     position = pyautogui.position()
     print(f"Captured item position: {position}")
+    print(self.sell_option_var.get())
 
     # If Multi-Sell is selected
     if self.sell_option_var.get() == '2':
         new_entry = {
+            "RowId": str(uuid.uuid4()),  # Generate a unique ID for each entry
             "Position": position,
             "Item": "Gear",
-            "Class": "Ranger",
+            "Class": "Default",  # Set the default value as a string
             "Price": "100",
             "Status": ""
         }
         self.multi_item_positions.append(new_entry)
-        # Update the table in the GUI here (you'd fill this in)
         self.update_table()  # Update the table in the GUI
-
-        
-    # If Single-Sell is selected
     else:
         item_position = position
+
 
 
     
@@ -524,6 +524,9 @@ class TradingApp:
         try:
             
             self.multi_item_positions = []
+            self.class_vars = []
+            self.selected_class_values = {}
+
             
             ## DATA 
             self.successful_sales_var = tk.StringVar(value='Successful Sales: 0')  # Add initial value
@@ -728,24 +731,23 @@ class TradingApp:
 
                 # Dropdown menu for 'Class' column
                 class_var = tk.StringVar(value=row_data["Class"])
-                class_menu = ttk.OptionMenu(self.table_frame, class_var, *class_list)
+                self.class_vars.append(class_var)
+                
+                class_menu = ttk.OptionMenu(self.table_frame, class_var, row_data["Class"], *class_list)
+
                 class_menu.grid(row=i, column=1)
-                class_var.trace_add('write', lambda *args, i=i: update_row_value(i, 'Class', class_var))
+                class_var.trace_add('write', lambda *args, i=i: self.update_row_value(i, 'Class', class_var))
 
                 # Editable entry for 'Price' column
                 price_var = tk.StringVar(value=row_data["Price"])
                 price_entry = tk.Entry(self.table_frame, width=10, textvariable=price_var)
                 price_entry.grid(row=i, column=2)
-                price_var.trace_add('write', lambda *args, i=i: update_row_value(i, 'Price', price_var))
+                price_var.trace_add('write', lambda *args, i=i: self.update_row_value(i, 'Price', price_var))
 
                 tk.Label(self.table_frame, text=row_data["Status"], width=10, borderwidth=2, relief="solid").grid(row=i, column=3)
             
             self.table_frame.update_idletasks()
             #canvas.config(scrollregion=canvas.bbox("all"))
-
-            
-            
-            
 
 
             self.test_button = ttk.Button(self.master, text="Test Trade Room", command=lambda: threading.Thread(target=self.monitor_trade_room_callback).start())
@@ -829,19 +831,25 @@ class TradingApp:
         for i, row_data in enumerate(self.multi_item_positions, start=1):
             print(f"Adding row {i} with data {row_data}")
 
-            tk.Label(self.table_frame, text=row_data["Item"], width=20, borderwidth=2, relief="solid").grid(row=i, column=0)
-
             # Dropdown for 'Class' column
-            class_var = tk.StringVar(value=row_data["Class"])
-            class_menu = ttk.OptionMenu(self.table_frame, class_var, *class_list)
+            class_var = tk.StringVar()  # Create the StringVar without an initial value
+
+            # Set the selected option based on row_data["Class"]
+            class_var.set(row_data["Class"])
+
+            class_menu = ttk.OptionMenu(self.table_frame, class_var, row_data["Class"], *class_list)
             class_menu.grid(row=i, column=1)
-            class_var.trace_add('write', lambda *args, i=i: self.update_row_value(i, 'Class', class_var))
+
+            # Use row_data["RowId"] directly
+            class_var.trace_add('write', lambda *args, class_var=class_var, row_data=row_data: self.update_row_value(row_data["RowId"], 'Class', class_var))
 
             # Editable entry for 'Price' column
             price_var = tk.StringVar(value=row_data["Price"])
             price_entry = tk.Entry(self.table_frame, width=10, textvariable=price_var)
             price_entry.grid(row=i, column=2)
-            price_var.trace_add('write', lambda *args, i=i: self.update_row_value(i, 'Price', price_var))
+
+            # Use row_data["RowId"] directly
+            price_var.trace_add('write', lambda *args, price_var=price_var, row_data=row_data: self.update_row_value(row_data["RowId"], 'Price', price_var))
 
             tk.Label(self.table_frame, text=row_data["Status"], width=10, borderwidth=2, relief="solid").grid(row=i, column=3)
 
@@ -851,6 +859,8 @@ class TradingApp:
 
         print("Table updated.")
 
+
+
     def clear_table(self):
         self.multi_item_positions.clear()  # Clear the list
         self.update_table()  # Update the table to reflect the changes
@@ -858,17 +868,14 @@ class TradingApp:
 
 
     # A function to update the class and price when changed
-    def update_row_value(self, i, key, var):
+    def update_row_value(self, row_id, key, var):
         new_value = var.get()
-        if 0 <= i < len(self.multi_item_positions):
-            self.multi_item_positions[i][key] = new_value
-            print(f"Updated row {i + 1}, {key} to {new_value}")
-            print(f"Current state of multi_item_positions: {self.multi_item_positions}")
-        else:
-            print(f"Invalid index: {i}")
-
-
-
+        for i, row_data in enumerate(self.multi_item_positions):
+            if row_data["RowId"] == row_id:
+                row_data[key] = new_value
+                print(f"Updated row {i + 1}, {key} to {new_value}")
+                print(f"Current state of multi_item_positions: {self.multi_item_positions}")
+                break  # Exit the loop once the row is found
 
 
 app = TradingApp(
