@@ -295,7 +295,17 @@ def monitor_trade_room(chat_entry):
                 if gold_value_text:
                     print(f"Gold value region captured: {gold_value_text}")
 
-                    entry_value = chat_entry.get()  # Get the value from the Tkinter entry box
+                    # Check the type of chat_entry and get entry_value accordingly
+                    if isinstance(chat_entry, tk.Entry):  # If it's a Tkinter Entry widget
+                        entry_value = chat_entry.get()
+                        print("Entry value: FROM TK ", entry_value)
+                    elif isinstance(chat_entry, str):  # If it's a string
+                        entry_value = chat_entry
+                        print("Entry value: FROM STRING ", entry_value)
+                    else:
+                        print("Unsupported type for chat_entry")
+                        return  # Or handle this case as you see fit
+
                     if entry_value == gold_value_text:  # Convert gold_value_text to integer
                         print("Gold value matches or is higher than the set entry value. Proceeding to click.")
                         
@@ -413,6 +423,8 @@ def monitor_trade_room(chat_entry):
             time.sleep(1)  # Check every second or adjust this timing as needed
         else:
             print("You are not in a private trading room.")
+            stop_monitoring_trade_room()  # Stop monitoring the trade room
+            app.start_sell_thread()
             break  # Exit the loop if not in a private room
 
 def stop_monitoring_trade_room():
@@ -479,7 +491,8 @@ def start_auto_chat(chat_entry):
 
             keyboard.release('shift')  # Release shift using keyboard library
             time.sleep(0.2)  # Release the Shift key after a moment
-        # Locate the chat box
+            
+            # Locate the chat box
             chat_box_location = pyautogui.locateOnScreen('./image_locations/chat_box.jpg', confidence=0.8)
             
             if chat_box_location:
@@ -525,36 +538,81 @@ keyboard.add_hotkey('F8', stop_auto_chat)
 def goto_class(item_class):
     print("Class:", item_class)
     #print("Navigating to class trade chat...")
-    if item_class == "Fighter":
-        print("Navigating to Fighter trade chat...")
-        #pyautogui.click(1193, 287)
-    elif item_class ==  "Wizard":
-        print("Navigating to Wizard trade chat...")
-        #pyautogui.click(1205, 595)
-    elif item_class ==  "Ranger":
-        print("Navigating to Ranger trade chat...")
-        #pyautogui.click(1188, 520)
-    elif item_class ==  "Rogue":
-        print("Navigating to Rogue trade chat...")
-        #pyautogui.click(1190, 444)
-    elif item_class ==  "Cleric":
-        print("Navigating to Cleric trade chat...")
-        #pyautogui.click(1193, 664)
-    elif item_class ==  "Bard":
-        print("Navigating to Bard trade chat...")
-        #pyautogui.click(1184, 752)
-    elif item_class ==  "Barbarian":
-        print("Navigating to Barbarian trade chat...")
-        #pyautogui.click(1188, 367)
-    elif item_class ==  "Warlock":
-        print("Navigating to Warlock trade chat...")
-        #pyautogui.click(800, 800)
-    elif item_class ==  "Utility":
-        print("Navigating to Utility trade chat...")
-        #pyautogui.click(1185, 946)
-    elif item_class ==  "Default":
-        print("Navigating to Default trade chat...")
-        #pyautogui.click(1000, 1000)
+    
+    chat_area = pyautogui.locateOnScreen('./image_locations/chat_area.jpg', confidence=0.8)
+    if chat_area:
+        
+        leave_channel = pyautogui.locateOnScreen('./image_locations/leave_channel.png', confidence=0.8)
+        if leave_channel:
+            pyautogui.moveTo(leave_channel)
+            pyautogui.click(leave_channel)
+            time.sleep(0.1)
+            yes = pyautogui.locateOnScreen('./image_locations/yes.png', confidence=0.8)
+            if yes:
+                pyautogui.moveTo(yes)
+                pyautogui.click(yes)
+                time.sleep(2)
+                select_channel = pyautogui.locateOnScreen('./image_locations/select_channel.png', confidence=0.8)
+                if select_channel:
+                
+                    if item_class == "Fighter":
+                        print("Navigating to Fighter trade chat...")
+                        pyautogui.moveTo(1193, 287)
+                        pyautogui.click(1193, 287)
+                        
+                        
+                    elif item_class ==  "Wizard":
+                        print("Navigating to Wizard trade chat...")
+                        pyautogui.moveTo(1205, 595)
+                        pyautogui.click(1205, 595)
+                        
+                    elif item_class ==  "Ranger":
+                        print("Navigating to Ranger trade chat...")
+                        pyautogui.moveTo(1188, 520)
+                        pyautogui.click(1188, 520)
+                        
+                    elif item_class ==  "Rogue":
+                        print("Navigating to Rogue trade chat...")
+                        pyautogui.moveTo(1190, 444)
+                        pyautogui.click(1190, 444)
+                        
+                    elif item_class ==  "Cleric":
+                        print("Navigating to Cleric trade chat...")
+                        pyautogui.moveTo(1193, 664)
+                        pyautogui.click(1193, 664)
+                        
+                    elif item_class ==  "Bard":
+                        print("Navigating to Bard trade chat...")
+                        pyautogui.moveTo(1184, 752)
+                        pyautogui.click(1184, 752)
+                        
+                    elif item_class ==  "Barbarian":
+                        print("Navigating to Barbarian trade chat...")
+                        pyautogui.moveTo(1188, 367)
+                        pyautogui.click(1188, 367)
+                        
+                    elif item_class ==  "Warlock":
+                        print("Navigating to Warlock trade chat...")
+                        pyautogui.moveTo(1173, 814)
+                        pyautogui.click(1173, 814)
+                        
+                    elif item_class ==  "Utility":
+                        print("Navigating to Utility trade chat...")
+                        pyautogui.moveTo(1185, 946)
+                        pyautogui.click(1185, 946)
+                        
+                    elif item_class ==  "Default":
+                        print("Navigating to Default trade chat...")
+                else:
+                    print("No select channel found")
+            else:
+                print("No yes found")
+        else:
+            print("No chat area found")
+    else:
+        print("No leave channel found")
+    
+    
     
 def start_multi_sell(table_data):
     global item_position
@@ -577,16 +635,27 @@ def start_multi_sell(table_data):
         # Update status to 'Processing..'
         row['Status'] = 'Processing..'
         print(f"Processing Row ID: {row_id}, Status: {row['Status']}")
+        app.update_table()  # Update the table in the GUI
         
-        # Your selling logic here, for example:
+        # Selling logic here, for example:
         # 1. Navigate to the position on screen to click on the item (use the 'position' variable)
         # 2. Input the item's class and price to sell it (use 'item_class' and 'price' variables)
         goto_class(item_class)
-        item_position = position
-        start_auto_chat(price)
+        
+        time.sleep(3)
+        stash = pyautogui.locateOnScreen('./image_locations/stash2.png', confidence=0.8)
+        if stash:
+            time.sleep(0.3)
+            pyautogui.moveTo(stash)
+            pyautogui.click(stash)
+            item_position = position
+            start_auto_chat(price)
+        else:
+            print("No stash found")
         
         # Update status to 'Sold'
         row['Status'] = 'Sold'
+        app.update_table()  # Update the table in the GUI
         print(f"Item {item} from class {item_class} priced at {price} has been processed. Status: {row['Status']}")
 
 
@@ -620,7 +689,6 @@ class TradingApp:
             self.stop_trading_callback = stop_trading_callback
             self.start_auto_chat_callback = start_auto_chat_callback
             self.start_multi_chat_callback = start_multi_sell
-
             self.stop_auto_chat_callback = stop_auto_chat_callback
             self.monitor_trade_room_callback = monitor_trade_room_callback
             self.stop_monitoring_trade_room_callback = stop_monitoring_trade_room_callback
@@ -974,7 +1042,7 @@ app = TradingApp(
     monitor_trade_room, 
     stop_monitoring_trade_room,
     toggle_debug_mode,
-    start_multi_sell
+    start_multi_sell,
 )
 
 # Keybinding to capture item positions
