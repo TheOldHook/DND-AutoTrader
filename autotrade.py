@@ -983,4 +983,3 @@ root.iconphoto(True, PhotoImage(file=icon))
 
 root.after(100, check_queue)
 root.mainloop()
-
