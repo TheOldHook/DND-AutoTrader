@@ -32,6 +32,7 @@ chat_text = None  # Store the chat text
 is_monitoring_trade_room = False  # A global flag
 debug_windows = {}  # Initialize debug_windows here as an empty dictionary
 last_debug_coordinates = {}
+is_shift_pressed = False
 
 
 # For dropdown menus
@@ -252,6 +253,11 @@ def monitor_trade_room(chat_entry):
         if pvroom_location:
             print("You are in a private trading room.")
             
+            stash = pyautogui.locateOnScreen('stash.png', confidence=0.8)
+            time.sleep(0.3)
+            pyautogui.moveTo(stash)
+            pyautogui.click(stash)
+            
             # Check the phase of the trade
             phase1_location = pyautogui.locateOnScreen('trading_phase1.png', confidence=0.8)
             phase2_location = pyautogui.locateOnScreen('trading_phase2.png', confidence=0.8)
@@ -418,9 +424,14 @@ def stop_monitoring_trade_room():
 # Function to start auto-chat
 def start_auto_chat(chat_entry):
     global is_auto_chatting, item_position
-    chat_text = chat_entry.get() + "g"  # Automatically append "g"
+    #chat_text = chat_entry.get() + "g"  # Automatically append "g"
+    
+    # Check the type of chat_entry and act accordingly
+    if hasattr(chat_entry, 'get'):
+        chat_text = chat_entry.get() + "g"  # Automatically append "g"
+    else:
+        chat_text = chat_entry + "g"  # Assume it's a string and append "g"
 
-    print("Please Shift + Left-Click the item you want to link in chat.")
     while item_position is None:
         time.sleep(1)
     print("Item position captured. Starting auto-chat.")
@@ -513,7 +524,7 @@ keyboard.add_hotkey('F8', stop_auto_chat)
 
 def goto_class(item_class):
     print("Class:", item_class)
-    print("Navigating to class trade chat...")
+    #print("Navigating to class trade chat...")
     if item_class == "Fighter":
         print("Navigating to Fighter trade chat...")
         #pyautogui.click(100, 100)
@@ -546,6 +557,7 @@ def goto_class(item_class):
         #pyautogui.click(1000, 1000)
     
 def start_multi_sell(table_data):
+    global item_position
     print("Starting multi selling...")
     print("Data:", table_data)
     
@@ -570,6 +582,8 @@ def start_multi_sell(table_data):
         # 1. Navigate to the position on screen to click on the item (use the 'position' variable)
         # 2. Input the item's class and price to sell it (use 'item_class' and 'price' variables)
         goto_class(item_class)
+        item_position = position
+        start_auto_chat(price)
         
         # Update status to 'Sold'
         row['Status'] = 'Sold'
@@ -584,6 +598,7 @@ def start_multi_sell(table_data):
 
 from tkinter import Canvas, Scrollbar
 
+
 class TradingApp:
     def __init__(self, master, start_trading_callback, stop_trading_callback, start_auto_chat_callback, stop_auto_chat_callback, monitor_trade_room_callback, stop_monitoring_trade_room_callback, toggle_debug_mode_callback, start_multi_sell):
         try:
@@ -594,8 +609,8 @@ class TradingApp:
             self.current_status_dict = {}
             
             ## DATA 
-            self.successful_sales_var = tk.StringVar(value='Successful Sales: 0')  # Add initial value
-            self.total_gold_var = tk.StringVar(value='Total Session Gold: 0')  # Add initial value
+            self.successful_sales_var = tk.StringVar(value='Sales: 0')  # Add initial value
+            self.total_gold_var = tk.StringVar(value='Gold Earned: 0')  # Add initial value
 
             ## DATA END
             
@@ -612,7 +627,7 @@ class TradingApp:
             self.toggle_debug_mode_callback = toggle_debug_mode_callback
 
             self.master.title("The Old Trader")
-            self.master.geometry("900x500")
+            self.master.geometry("1000x500")
 
             # Create themed Tkinter root
             self.style = Style()
@@ -645,7 +660,7 @@ class TradingApp:
             self.tab_auto_sell.grid_columnconfigure(1, weight=1)
             self.tab_auto_sell.grid_columnconfigure(2, weight=3)
             
-
+            
             self.inner_frame = tk.Frame(self.tab_auto_trade)
             #
             self.inner_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
@@ -662,30 +677,14 @@ class TradingApp:
             custom_font = ("Helvetica", 16, "bold")
 
             # For frame1
-            frame1_header = ttk.Label(frame1, text="Settings", font=custom_font)
+            frame1_header = ttk.Label(frame1, text="Start & Stop", font=custom_font)
             frame1_header.pack(side=tk.TOP, padx=5, pady=5)
 
             # For frame2
             frame2_header = ttk.Label(frame2, text="Single-Sell", font=custom_font)
             frame2_header.pack(side=tk.TOP, padx=5, pady=5)
             
-            # Create the Clear button
-            self.clear_button = ttk.Button(
-                frame3, 
-                text="Clear List", 
-                command=self.clear_table  # Set the command to the function to clear the list and update the table
-            )
-            self.clear_button.pack(side=tk.BOTTOM, pady=5)
 
-            # Set the background and text color to red
-            self.clear_button.config(
-                style="clear.TButton"
-            )
-
-            # Create a style for the red button
-            self.style.configure("clear.TButton",
-                                foreground="white",
-                                background="red")
             
             # For frame3
             frame3_header = ttk.Label(frame3, text="Multi-Sell", font=custom_font, anchor="center", justify="center")
@@ -701,17 +700,44 @@ class TradingApp:
             
             # Place the radio buttons in frame1
             multi_sell_radio.pack(side=tk.TOP, padx=5, pady=5)
-            single_sell_radio.pack(side=tk.TOP, padx=5, pady=5)
+            single_sell_radio.pack(side=tk.TOP, padx=5, pady=10)
+            
+            def start_sell_thread():
+                if self.sell_option_var.get() == '1':
+                    threading.Thread(target=self.start_auto_chat_callback, args=(self.chat_entry,)).start()
+                else:
+                    threading.Thread(target=self.start_multi_chat_callback, args=(self.multi_item_positions,)).start()
+
+
+            self.start_chat_button = ttk.Button(
+                self.master, 
+                text="Start Auto Sell", 
+                command=start_sell_thread,
+                bootstyle='success'
+            )
+            self.start_chat_button.pack(in_=frame1, pady=5)
+
+            self.stop_chat_button = ttk.Button(self.master, text="Stop Auto Sell", command=self.stop_auto_chat_callback)
+            self.stop_chat_button.pack(in_=frame1, pady=5)
+            
+            # Create the Clear button
+            self.clear_button = ttk.Button(
+                frame1, 
+                text="Clear List", 
+                command=self.clear_table,  # Set the command to the function to clear the list and update the table
+                bootstyle='danger'
+            )
+            self.clear_button.pack(in_=frame1, pady=5)
 
             
             keybind_info = (
                 "SHIFT: Capture Item Position\n"
                 "F8: Stop Auto Selling/Trading\n"
             )
-            keybind_text = tk.Text(self.tab_auto_sell, height=6, width=30, wrap=tk.WORD, relief=tk.GROOVE)
+            keybind_text = tk.Text(self.tab_auto_sell, height=4, width=30, wrap=tk.WORD, relief=tk.GROOVE)
             keybind_text.insert(tk.END, keybind_info)
             keybind_text.config(state=tk.DISABLED)  # Make it read-only
-            keybind_text.pack(in_=frame1, padx=5, pady=5)
+            keybind_text.pack(in_=frame1, padx=5, pady=50)
         
 
             # Place the notebook on the Tkinter window
@@ -725,7 +751,7 @@ class TradingApp:
             self.stop_button.pack(in_=self.tab_auto_trade, pady=5)
             
             self.chat_label = Label(root, text="Sell Price:")
-            self.chat_label.pack(in_=frame2, pady=(85,5))
+            self.chat_label.pack(in_=frame2, pady=(20,5))
 
             # Entry box for chat text
             self.chat_entry = ttk.Entry(root, validate="key", validatecommand=(validate_cmd, '%P'), width=30, bootstyle='success')
@@ -734,30 +760,16 @@ class TradingApp:
 
             #keyboard.add_hotkey('F7', start_auto_chat, args=(self.chat_entry,))
             
-
-            def start_sell_thread():
-                if self.sell_option_var.get() == '1':
-                    threading.Thread(target=self.start_auto_chat_callback, args=(self.chat_entry,)).start()
-                else:
-                    threading.Thread(target=self.start_multi_chat_callback, args=(self.multi_item_positions,)).start()
-
-
-            self.start_chat_button = ttk.Button(
-                self.master, 
-                text="Start Auto Sell", 
-                command=start_sell_thread
-            )
-            self.start_chat_button.pack(in_=frame2, pady=5)
-
-            self.stop_chat_button = ttk.Button(self.master, text="Stop Auto Sell", command=self.stop_auto_chat_callback)
-            self.stop_chat_button.pack(in_=frame2, pady=5)
             
+            
+            frame2_counters = ttk.Frame(frame2)
+            frame2_counters.pack(pady=(20, 5))
             
             self.successful_sales_label = Label(self.tab_auto_sell, textvariable=self.successful_sales_var)
-            self.successful_sales_label.pack(in_=frame2, pady=(20, 5))
+            self.successful_sales_label.pack(in_=frame2, pady=(10, 5))
 
             self.total_gold_label = Label(self.tab_auto_sell, textvariable=self.total_gold_var)
-            self.total_gold_label.pack(in_=frame2, pady=(20, 5))
+            self.total_gold_label.pack(in_=frame2, pady=(10, 5))
             
             ## TABLE ##
             
@@ -876,8 +888,8 @@ class TradingApp:
         
         # Create a method to update the UI
     def update_ui(self, successful_sales, total_gold):
-        self.successful_sales_var.set(f"Successful Sales: {successful_sales}")
-        self.total_gold_var.set(f"Total Gold: {total_gold}")
+        self.successful_sales_var.set(f"Sales: {successful_sales}")
+        self.total_gold_var.set(f"Gold Earned: {total_gold}")
 
     def update_table(self):
         print("Updating table...")
@@ -962,6 +974,12 @@ app = TradingApp(
 
 # Keybinding to capture item positions
 keyboard.on_press_key('shift', lambda e, app=app: capture_item_position(app, e), suppress=False)
+
+icon = './icons/gold.png'
+from tkinter import PhotoImage
+
+root.iconphoto(True, PhotoImage(file=icon))
+
 
 root.after(100, check_queue)
 root.mainloop()
