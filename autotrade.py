@@ -58,7 +58,7 @@ from PIL import ImageEnhance, ImageFilter
 def read_test_image():
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # Update this path
 
-    test_image_path = "test_im.png"  # Replace with the path to your test image
+    test_image_path = "./image_locations/test_im.png"  # Replace with the path to your test image
     test_image = Image.open(test_image_path)
 
     # Image preprocessing
@@ -66,7 +66,7 @@ def read_test_image():
     test_image = test_image.filter(ImageFilter.SHARPEN)  # Apply sharpen filter
     enhancer = ImageEnhance.Contrast(test_image)
     test_image = enhancer.enhance(2)  # Increase contrast
-    test_image.save('debug_image.png')  # Save the image for debugging
+    test_image.save('./image_locations/debug_image.png')  # Save the image for debugging
     
     # Perform OCR on the test image
     custom_oem_psm_config = r'--oem 3 --psm 6'
@@ -161,7 +161,7 @@ def start_trading():
 
     is_trading = True
     while is_trading:
-        chat_area = pyautogui.locateOnScreen('chat_area.jpg', confidence=0.8)
+        chat_area = pyautogui.locateOnScreen('./image_locations/chat_area.jpg', confidence=0.8)
         if chat_area:
             for image_path, is_selected in selected_item_images.items():
                 if is_selected:
@@ -194,7 +194,7 @@ def start_trading():
                         # Wait for the menu to appear
                         #click trade
                         time.sleep(0.1)
-                        trade_location = pyautogui.locateOnScreen('click_trade.jpg', confidence=0.7)
+                        trade_location = pyautogui.locateOnScreen('./image_locations/click_trade.jpg', confidence=0.7)
                         if trade_location:
                             #time.sleep(0.1)
                             pyautogui.moveTo(trade_location)
@@ -249,18 +249,18 @@ def monitor_trade_room(chat_entry):
         # Check if you're in a private trading room
         #pvroom_location = pyautogui.locateOnScreen('pvtroom2.jpg', confidence=0.8)
         #pvroom_location2 = pyautogui.locateOnScreen('pvtroom.png', confidence=0.8)
-        pvroom_location = pyautogui.locateOnScreen('pvtroom3.jpg', confidence=0.8)
+        pvroom_location = pyautogui.locateOnScreen('./image_locations/pvtroom3.jpg', confidence=0.8)
         if pvroom_location:
             print("You are in a private trading room.")
             
-            stash = pyautogui.locateOnScreen('stash.png', confidence=0.8)
+            stash = pyautogui.locateOnScreen('./image_locations/stash.png', confidence=0.8)
             time.sleep(0.3)
             pyautogui.moveTo(stash)
             pyautogui.click(stash)
             
             # Check the phase of the trade
-            phase1_location = pyautogui.locateOnScreen('trading_phase1.png', confidence=0.8)
-            phase2_location = pyautogui.locateOnScreen('trading_phase2.png', confidence=0.8)
+            phase1_location = pyautogui.locateOnScreen('./image_locations/trading_phase1.png', confidence=0.8)
+            phase2_location = pyautogui.locateOnScreen('./image_locations/trading_phase2.png', confidence=0.8)
             hardcoded_coordinates = (815, 345, 100, 20)
             
             if phase1_location:
@@ -285,7 +285,7 @@ def monitor_trade_room(chat_entry):
                 gray_image = Image.fromarray(gray)
 
                 # Save the screenshot for debugging
-                gray_image.save("debug_screenshot_gray.png")
+                gray_image.save("./image_locations/debug_screenshot_gray.png")
 
 
                 # Custom Tesseract Configuration
@@ -302,7 +302,7 @@ def monitor_trade_room(chat_entry):
                         
                         # Your code to click on an image goes here
                         # For example, locate and click on an "Accept" button
-                        accept_button_location = pyautogui.locateOnScreen('greycheck.png', confidence=0.8)
+                        accept_button_location = pyautogui.locateOnScreen('./image_locations/greycheck.png', confidence=0.8)
                         if accept_button_location:
                             pyautogui.click(accept_button_location)
                             time.sleep(5)
@@ -327,7 +327,7 @@ def monitor_trade_room(chat_entry):
                             
                             time.sleep(1)
                         
-                            accept_button_location = pyautogui.locateOnScreen('greycheck.png', confidence=0.8)
+                            accept_button_location = pyautogui.locateOnScreen('./image_locations/greycheck.png', confidence=0.8)
                             if accept_button_location:
                                 pyautogui.click(accept_button_location)
                                 time.sleep(3)
@@ -366,7 +366,7 @@ def monitor_trade_room(chat_entry):
                 gray_image = Image.fromarray(gray)
 
                 # Save the screenshot for debugging
-                gray_image.save("debug_screenshot_gray.png")
+                gray_image.save("./image_locations/debug_screenshot_gray.png")
 
 
                 # Custom Tesseract Configuration
@@ -399,7 +399,7 @@ def monitor_trade_room(chat_entry):
                         
                         time.sleep(1)
                         
-                        accept_button_location = pyautogui.locateOnScreen('greycheck.png', confidence=0.8)
+                        accept_button_location = pyautogui.locateOnScreen('./image_locations/greycheck.png', confidence=0.8)
                         if accept_button_location:
                             pyautogui.click(accept_button_location)
                             time.sleep(3)
@@ -439,16 +439,16 @@ def start_auto_chat(chat_entry):
     is_auto_chatting = True
     while is_auto_chatting:
                 # Check for trade request
-        trade_request_location = pyautogui.locateOnScreen('trade_request.jpg', confidence=0.8)
+        trade_request_location = pyautogui.locateOnScreen('./image_locations/trade_request.jpg', confidence=0.8)
         if trade_request_location:
             print("Trade request detected. Stopping auto chat.")
-            yes_location = pyautogui.locateOnScreen('yes.png', confidence=0.8)
+            yes_location = pyautogui.locateOnScreen('./image_locations/yes.png', confidence=0.8)
             if yes_location:
                 pyautogui.moveTo(yes_location)
                 pyautogui.click(yes_location)
                 print("Accepted trade request.")
                 time.sleep(3)
-                stash = pyautogui.locateOnScreen('stash.png', confidence=0.8)
+                stash = pyautogui.locateOnScreen('./image_locations/stash.png', confidence=0.8)
                 time.sleep(0.3)
                 pyautogui.moveTo(stash)
                 pyautogui.click(stash)
@@ -480,7 +480,7 @@ def start_auto_chat(chat_entry):
             keyboard.release('shift')  # Release shift using keyboard library
             time.sleep(0.2)  # Release the Shift key after a moment
         # Locate the chat box
-            chat_box_location = pyautogui.locateOnScreen('chat_box.jpg', confidence=0.8)
+            chat_box_location = pyautogui.locateOnScreen('./image_locations/chat_box.jpg', confidence=0.8)
             
             if chat_box_location:
                 # Calculate the coordinates to click 100 pixels to the left of the chat box
