@@ -37,11 +37,10 @@ Usage
 Clone this repository to your local machine:
 
 
-Copy code
+```
 git clone https://github.com/TheOldHook/DND-AutoTrader.git
+```
 Navigate to the project directory:
-
-
 ```cd DND-AutoTrader```
 Configure the application as needed (see Configuration).
 
@@ -50,9 +49,9 @@ Start the application:
 ```python autotrade.py```
 Follow the on-screen instructions and in terminal and enjoy automated trading!
 
-```Auto Trader Tab, is using image rec to find images in chat that you can add and it will automaticly make trade requests, i made this because i was tired of being too late for a good item```
+```Auto Trader Tab```, is using image rec to find images in chat that you can add and it will automaticly make trade requests, i made this because i was tired of being too late for a good item.
 
-```Auto Sell Tab, you can choose to only sell one item or if you want to use the more "advanced" multi-sell feature where you just use SHIFT to select items you want to sell (while in the trade channel)```
+```Auto Sell Tab```, you can choose to only sell one item or if you want to use the more "advanced" multi-sell feature where you just use SHIFT to select items you want to sell before pressing start (while in the trade channel).
 
 Configuration
 You can configure The Old Trader by modifying the settings in the source code or by using command-line arguments. Customize the application to your preferences and trading needs.
@@ -60,11 +59,13 @@ You can configure The Old Trader by modifying the settings in the source code or
 Dependencies
 The Old Trader relies on the following Python packages:
 
-pyautogui: For automating mouse and keyboard actions.
-keyboard: For handling keyboard events.
-pillow: For working with images.
-numpy: For numerical operations.
-tesseract: For OCR (Optical Character Recognition) support.
+```pyautogui: For automating mouse and keyboard actions.```
+```keyboard: For handling keyboard events.```
+```pillow: For working with images.```
+```numpy: For numerical operations.```
+```tesseract: For OCR (Optical Character Recognition) support.```
+
+
 Contributing
 We welcome contributions from the community. If you find a bug, have a feature request, or want to contribute in any way, please open an issue or create a pull request.
 
