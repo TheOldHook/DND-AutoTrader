@@ -666,7 +666,7 @@ def start_multi_sell(table_data):
 
 
 from tkinter import Canvas, Scrollbar
-
+import psutil
 
 class TradingApp:
     def __init__(self, master, start_trading_callback, stop_trading_callback, start_auto_chat_callback, stop_auto_chat_callback, monitor_trade_room_callback, stop_monitoring_trade_room_callback, toggle_debug_mode_callback, start_multi_sell):
@@ -802,6 +802,31 @@ class TradingApp:
             )
             self.clear_button.pack(in_=frame1, pady=5)
 
+            
+            
+            self.kill_switch_var = tk.BooleanVar(value=False)
+            self.kill_switch_active = False
+
+            self.kill_switch_button = ttk.Checkbutton(
+                frame1,
+                text="Kill Switch",
+                variable=self.kill_switch_var,
+                command=self.toggle_kill_switch
+            )
+            self.kill_switch_button.pack(side=tk.TOP, padx=5, pady=5)
+
+            # Create a frame to hold the entry and label
+            self.delay_frame = tk.Frame(frame1)
+            self.delay_frame.pack(side=tk.TOP, padx=5, pady=5)
+
+            self.kill_delay_var = tk.StringVar(value="1")  # Default delay is 1 minute
+            self.kill_delay_entry = ttk.Entry(self.delay_frame, textvariable=self.kill_delay_var, state="disabled", width=5)
+            self.kill_delay_entry.pack(side=tk.LEFT)
+
+            self.min_label = tk.Label(self.delay_frame, text="min")
+            self.min_label.pack(side=tk.LEFT)
+            
+            
             
             keybind_info = (
                 "SHIFT: Capture Item Position\n"
@@ -1031,6 +1056,35 @@ class TradingApp:
                 #print(f"Updated row {i + 1}, {key} to {new_value}")
                 #print(f"Current state of multi_item_positions: {self.multi_item_positions}")
                 break  # Exit the loop once the row is found
+            
+            
+    def toggle_kill_switch(self):
+        self.kill_switch_active = self.kill_switch_var.get()
+        if self.kill_switch_active:
+            self.kill_delay_entry.config(state="normal")
+            delay = int(self.kill_delay_var.get()) * 60  # Convert minutes to seconds
+            threading.Thread(target=self.kill_process_and_script, args=(delay,)).start()
+        else:
+            self.kill_delay_entry.config(state="disabled")
+
+    def kill_process_and_script(self, delay):
+        start_time = time.time()
+        
+        while time.time() - start_time < delay:
+            time.sleep(1)
+            if not self.kill_switch_active:
+                print("Kill switch deactivated.")
+                return
+        
+        print("Kill switch activated.")
+
+        # Kill the game process (replace "GameExecutable.exe" with your game's executable name)
+        for proc in psutil.process_iter(attrs=["pid", "name"]):
+            if "DungeonCrawler.exe" in proc.info["name"]:
+                psutil.Process(proc.info["pid"]).terminate()
+
+        # Kill the script
+        os._exit(0)
 
 
 app = TradingApp(
@@ -1053,6 +1107,6 @@ from tkinter import PhotoImage
 
 root.iconphoto(True, PhotoImage(file=icon))
 
-
+root.after(1000, app.update_table) # Update the table every second
 root.after(100, check_queue)
 root.mainloop()
