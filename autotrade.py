@@ -819,7 +819,7 @@ class TradingApp:
             self.delay_frame = tk.Frame(frame1)
             self.delay_frame.pack(side=tk.TOP, padx=5, pady=5)
 
-            self.kill_delay_var = tk.StringVar(value="1")  # Default delay is 1 minute
+            self.kill_delay_var = tk.StringVar(value="60")  # Default delay is 1 minute
             self.kill_delay_entry = ttk.Entry(self.delay_frame, textvariable=self.kill_delay_var, state="disabled", width=5)
             self.kill_delay_entry.pack(side=tk.LEFT)
 
