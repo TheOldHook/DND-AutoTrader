@@ -419,6 +419,7 @@ def monitor_trade_room(chat_entry):
                         time.sleep(0.1)
                         pyautogui.click(839, 328)
                         time.sleep(0.1)
+                        pyautogui.click(887, 328)
                         pyautogui.click(706, 375)
                         time.sleep(0.1)
                         pyautogui.click(752, 375)
