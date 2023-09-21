@@ -315,6 +315,7 @@ def monitor_trade_room(chat_entry):
                         accept_button_location = pyautogui.locateOnScreen('./image_locations/greycheck.png', confidence=0.8)
                         if accept_button_location:
                             pyautogui.click(accept_button_location)
+                            print("Clicked accept the greybutton.")
                             time.sleep(5)
                             
                             pyautogui.click(703, 319)
@@ -334,6 +335,26 @@ def monitor_trade_room(chat_entry):
                             pyautogui.click(842, 375)
                             time.sleep(0.1)
                             pyautogui.click(887, 375)
+                            time.sleep(0.1)
+                            pyautogui.click(703, 430),
+                            time.sleep(0.1)
+                            pyautogui.click(752, 430)
+                            time.sleep(0.1)
+                            pyautogui.click(793, 430)
+                            time.sleep(0.1)
+                            pyautogui.click(839, 430)
+                            time.sleep(0.1)
+                            pyautogui.click(887, 430)
+                            time.sleep(0.1)
+                            pyautogui.click(703, 485)
+                            time.sleep(0.1)
+                            pyautogui.click(752, 485)
+                            time.sleep(0.1)
+                            pyautogui.click(793, 485)
+                            time.sleep(0.1)
+                            pyautogui.click(839, 485)
+                            
+                            print("Clicked on the money locations.")
                             
                             time.sleep(1)
                         
@@ -344,6 +365,7 @@ def monitor_trade_room(chat_entry):
                                 successful_sales += 1
                                 total_gold += int(entry_value)
                                 app.update_ui(successful_sales, total_gold)
+                                print("Successful sales!!")
 
 
                     else:
@@ -464,6 +486,7 @@ def start_auto_chat(chat_entry):
                 time.sleep(0.3)
                 pyautogui.moveTo(stash)
                 pyautogui.click(stash)
+                print("Clicked stash")
                 
                     # Calculate the new x-coordinate for the trade phase
                 new_trade_x = item_position.x + 318  # 318 is the offset
@@ -472,6 +495,7 @@ def start_auto_chat(chat_entry):
             
                 pyautogui.moveTo(new_trade_position)
                 pyautogui.click(new_trade_position)
+                print("Clicked on new trade position")
                 
                 monitor_trade_room(chat_entry)
             stop_auto_chat()  # Stop the auto chat
