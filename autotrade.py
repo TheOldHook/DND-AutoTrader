@@ -538,7 +538,7 @@ def start_auto_chat(chat_entry):
 def stop_auto_chat():
     global is_auto_chatting, item_position  # Declare item_position as global
     is_auto_chatting = False
-    #item_position = None  # Reset the item position
+    item_position = None  # Reset the item position
     chat_text = None
     print("Stopped auto chat and cleared item position.")
 
@@ -676,11 +676,18 @@ def start_multi_sell(table_data):
             start_auto_chat(price)
         else:
             print("No stash found")
+            
+        # Check if auto chat should be stopped
+        if not is_auto_chatting:
+            print("Auto chat stopped. Exiting loop.")
+            break  # Exit the loop
         
         # Update status to 'Sold'
         row['Status'] = 'Sold'
         app.update_table()  # Update the table in the GUI
         print(f"Item {item} from class {item_class} priced at {price} has been processed. Status: {row['Status']}")
+        
+
 
 
 
