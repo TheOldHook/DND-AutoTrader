@@ -644,6 +644,7 @@ def start_multi_sell(table_data):
     print("Data:", table_data)
     
     for row in table_data:
+        print(f"Current row data before processing: {row}")
         row_id = row['RowId']
         position = row['Position']
         item = row['Item']
@@ -652,14 +653,18 @@ def start_multi_sell(table_data):
         status = row['Status']
 
         # Skip if already sold
-        if status == 'Sold':
+        if row['Status'] == 'Sold':
             print(f"Skipping Row ID: {row_id}, Status: Sold")
             continue  # Skip to the next iteration
 
         # Update status to 'Processing..'
         row['Status'] = 'Processing..'
         print(f"Processing Row ID: {row_id}, Status: {row['Status']}")
-        app.update_table()  # Update the table in the GUI
+        
+        try:
+            app.update_table()  # Update the table in the GUI
+        except Exception as e:
+            print(f"An error occurred while updating the table: {e}")
         
         # Selling logic here, for example:
         # 1. Navigate to the position on screen to click on the item (use the 'position' variable)
@@ -678,13 +683,17 @@ def start_multi_sell(table_data):
             print("No stash found")
             
         # Check if auto chat should be stopped
-        if not is_auto_chatting:
-            print("Auto chat stopped. Exiting loop.")
-            break  # Exit the loop
+        # if not is_auto_chatting:
+        #     print("Auto chat stopped. Exiting loop.")
+        #     break  # Exit the loop
         
         # Update status to 'Sold'
         row['Status'] = 'Sold'
-        app.update_table()  # Update the table in the GUI
+        try:
+            app.update_table()  # Update the table in the GUI
+        except Exception as e:
+            print(f"An error occurred while updating the table: {e}")
+            
         print(f"Item {item} from class {item_class} priced at {price} has been processed. Status: {row['Status']}")
         
 
