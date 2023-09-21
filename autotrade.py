@@ -806,17 +806,12 @@ class TradingApp:
             multi_sell_radio.pack(side=tk.TOP, padx=5, pady=5)
             single_sell_radio.pack(side=tk.TOP, padx=5, pady=10)
             
-            def start_sell_thread():
-                if self.sell_option_var.get() == '1':
-                    threading.Thread(target=self.start_auto_chat_callback, args=(self.chat_entry,)).start()
-                else:
-                    threading.Thread(target=self.start_multi_chat_callback, args=(self.multi_item_positions,)).start()
 
 
             self.start_chat_button = ttk.Button(
                 self.master, 
                 text="Start Auto Sell", 
-                command=start_sell_thread,
+                command=self.start_sell_thread,
                 bootstyle='success'
             )
             self.start_chat_button.pack(in_=frame1, pady=5)
@@ -970,8 +965,14 @@ class TradingApp:
 
         except Exception as e:
             print(e)
+            
+    def start_sell_thread(self):
+        if self.sell_option_var.get() == '1':
+            threading.Thread(target=self.start_auto_chat_callback, args=(self.chat_entry,)).start()
+        else:
+            threading.Thread(target=self.start_multi_chat_callback, args=(self.multi_item_positions,)).start()
 
-            # More widgets and initialization code here...
+
     def refresh_images(self):
             for widget in self.inner_frame.winfo_children():
                 widget.destroy()
