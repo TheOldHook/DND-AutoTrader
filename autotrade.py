@@ -515,7 +515,7 @@ def start_auto_chat(chat_entry):
             time.sleep(2)  # Hold the Shift key down for a bit longer
 
             pyautogui.mouseDown(button='left')  # Mouse down using pyautogui
-            time.sleep(0.2)  # Allow time for the click to register
+            time.sleep(1)  # Allow time for the click to register
             pyautogui.mouseUp(button='left')  # Mouse up using pyautogui
 
             keyboard.release('shift')  # Release shift using keyboard library
