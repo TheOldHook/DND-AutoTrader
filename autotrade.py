@@ -326,6 +326,8 @@ def monitor_trade_room(chat_entry):
                             time.sleep(0.1)
                             pyautogui.click(839, 328)
                             time.sleep(0.1)
+                            pyautogui.click(887, 328)
+                            time.sleep(0.1)
                             pyautogui.click(706, 375)
                             time.sleep(0.1)
                             pyautogui.click(752, 375)
@@ -346,14 +348,15 @@ def monitor_trade_room(chat_entry):
                             time.sleep(0.1)
                             pyautogui.click(887, 430)
                             time.sleep(0.1)
-                            pyautogui.click(703, 485)
+                            pyautogui.click(703, 510)
                             time.sleep(0.1)
-                            pyautogui.click(752, 485)
+                            pyautogui.click(752, 510)
                             time.sleep(0.1)
-                            pyautogui.click(793, 485)
+                            pyautogui.click(793, 510)
                             time.sleep(0.1)
-                            pyautogui.click(839, 485)
-                            
+                            pyautogui.click(839, 510)
+                            time.sleep(0.1)
+                            pyautogui.click(839, 510)
                             print("Clicked on the money locations.")
                             
                             time.sleep(1)
@@ -508,7 +511,7 @@ def start_auto_chat(chat_entry):
             time.sleep(0.5)  # Pause for a moment
 
             keyboard.press('shift')  # Press and hold shift using keyboard library
-            time.sleep(0.2)  # Hold the Shift key down for a bit longer
+            time.sleep(2)  # Hold the Shift key down for a bit longer
 
             pyautogui.mouseDown(button='left')  # Mouse down using pyautogui
             time.sleep(0.2)  # Allow time for the click to register
@@ -652,7 +655,8 @@ def start_multi_sell(table_data):
         item_class = row['Class']
         price = row['Price']
         status = row['Status']
-
+        item_position = position
+        
         # Skip if already sold
         if row['Status'] == 'Sold':
             print(f"Skipping Row ID: {row_id}, Status: Sold")
@@ -678,7 +682,6 @@ def start_multi_sell(table_data):
             time.sleep(0.3)
             pyautogui.moveTo(stash)
             pyautogui.click(stash)
-            item_position = position
             start_auto_chat(price)
         else:
             print("No stash found")
