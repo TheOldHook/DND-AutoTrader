@@ -33,7 +33,7 @@ is_monitoring_trade_room = False  # A global flag
 debug_windows = {}  # Initialize debug_windows here as an empty dictionary
 last_debug_coordinates = {}
 is_shift_pressed = False
-
+is_stop_pressed = False
 
 # For dropdown menus
 class_list = ["Fighter", "Wizard", "Ranger", "Rogue", "Cleric", "Bard", "Barbarian", "Warlock", "Utility", "Default"]
@@ -461,7 +461,8 @@ def stop_monitoring_trade_room():
 
 # Function to start auto-chat
 def start_auto_chat(chat_entry):
-    global is_auto_chatting, item_position
+    global is_auto_chatting, item_position, is_stop_pressed
+    is_stop_pressed = False
     #chat_text = chat_entry.get() + "g"  # Automatically append "g"
     
     # Check the type of chat_entry and act accordingly
@@ -540,10 +541,12 @@ def start_auto_chat(chat_entry):
 
 
 def stop_auto_chat():
-    global is_auto_chatting, item_position  # Declare item_position as global
+    global is_auto_chatting, item_position, is_stop_pressed  # Declare item_position as global
     is_auto_chatting = False
     item_position = None  # Reset the item position
     chat_text = None
+    is_stop_pressed = True
+
     print("Stopped auto chat and cleared item position.")
 
 
@@ -587,47 +590,56 @@ def goto_class(item_class):
                         print("Navigating to Fighter trade chat...")
                         pyautogui.moveTo(1193, 287)
                         pyautogui.click(1193, 287)
+                        time.sleep(1)
                         
                         
                     elif item_class ==  "Wizard":
                         print("Navigating to Wizard trade chat...")
                         pyautogui.moveTo(1205, 595)
                         pyautogui.click(1205, 595)
+                        time.sleep(1)
                         
                     elif item_class ==  "Ranger":
                         print("Navigating to Ranger trade chat...")
                         pyautogui.moveTo(1188, 520)
                         pyautogui.click(1188, 520)
+                        time.sleep(1)
                         
                     elif item_class ==  "Rogue":
                         print("Navigating to Rogue trade chat...")
                         pyautogui.moveTo(1190, 444)
                         pyautogui.click(1190, 444)
+                        time.sleep(1)
                         
                     elif item_class ==  "Cleric":
                         print("Navigating to Cleric trade chat...")
                         pyautogui.moveTo(1193, 664)
                         pyautogui.click(1193, 664)
+                        time.sleep(1)
                         
                     elif item_class ==  "Bard":
                         print("Navigating to Bard trade chat...")
                         pyautogui.moveTo(1184, 752)
                         pyautogui.click(1184, 752)
+                        time.sleep(1)
                         
                     elif item_class ==  "Barbarian":
                         print("Navigating to Barbarian trade chat...")
                         pyautogui.moveTo(1188, 367)
                         pyautogui.click(1188, 367)
+                        time.sleep(1)
                         
                     elif item_class ==  "Warlock":
                         print("Navigating to Warlock trade chat...")
                         pyautogui.moveTo(1173, 814)
                         pyautogui.click(1173, 814)
+                        time.sleep(1)
                         
                     elif item_class ==  "Utility":
                         print("Navigating to Utility trade chat...")
                         pyautogui.moveTo(1185, 946)
                         pyautogui.click(1185, 946)
+                        time.sleep(1)
                         
                     elif item_class ==  "Default":
                         print("Navigating to Default trade chat...")
@@ -643,7 +655,7 @@ def goto_class(item_class):
     
     
 def start_multi_sell(table_data):
-    global item_position
+    global item_position, is_stop_pressed
     print("Starting multi selling...")
     print("Data:", table_data)
     
@@ -687,9 +699,9 @@ def start_multi_sell(table_data):
             print("No stash found")
             
         # Check if auto chat should be stopped
-        # if not is_auto_chatting:
-        #     print("Auto chat stopped. Exiting loop.")
-        #     break  # Exit the loop
+        if is_stop_pressed is True:
+            print("Auto chat stopped. Exiting loop.")
+            break  # Exit the loop
         
         # Update status to 'Sold'
         row['Status'] = 'Sold'
@@ -1036,7 +1048,7 @@ class TradingApp:
 
     def update_table(self):
         print("Updating table...")
-        print(f"Data: {self.multi_item_positions}")
+        #print(f"Data: {self.multi_item_positions}")
 
         # Clear existing widgets in the table frame
         for widget in self.table_frame.winfo_children():
