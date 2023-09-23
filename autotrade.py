@@ -374,6 +374,7 @@ def monitor_trade_room(chat_entry):
                                 app.update_ui(successful_sales, total_gold)
                                 print("Successful sales!!")
                                 time.sleep(3)
+                                is_stop_pressed = False
                                 return True
                         
 
@@ -652,24 +653,20 @@ def start_multi_sell(table_data):
         item_position = row['Position']
         item_position = item_position
         start_auto_chat(price, position)
-        
-        was_successful = monitor_trade_room(price)  # Assume monitor_trade_room now returns a boolean
-        if was_successful:
-            row['Status'] = 'Sold'
-        else:
-            row['Status'] = 'Failed'
-        
-        # Check if auto chat should be stopped
-        if is_stop_pressed is True:
-            print("Auto chat stopped. Exiting loop.")
-            break  # Exit the loop
-        
+
+        row['Status'] = 'Sold'
         print(f"Row ID: {row_id}, Status: {row['Status']}")
+        
         try:
             app.update_table()  # Update the table in the GUI
         except Exception as e:
             print(f"An error occurred while updating the table: {e}")
-            
+
+        # Check if auto chat should be stopped
+        if is_stop_pressed is True:
+            print("Auto chat stopped. Exiting loop.")
+            break  # Exit the loop
+
         print(f"Item {item} from class {item_class} priced at {price} has been processed. Status: {row['Status']}")
         
 
