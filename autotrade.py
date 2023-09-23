@@ -349,6 +349,7 @@ def monitor_trade_room(chat_entry):
                             pyautogui.click(839, 468)
                             time.sleep(0.1)
                             pyautogui.click(887, 468)
+                            pyautogui.click(703, 510)
                             time.sleep(0.1)
                             pyautogui.click(703, 510)
                             time.sleep(0.1)
@@ -384,9 +385,6 @@ def monitor_trade_room(chat_entry):
                 else:
                     print("No text captured.")
                     
-        if is_stop_pressed is True:
-            print("Auto chat stopped. Exiting loop.")
-            break  # Exit the loop    
             time.sleep(1)  # Check every second or adjust this timing as needed
         else:
             print("You are not in a private trading room.")
