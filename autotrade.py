@@ -326,6 +326,8 @@ def monitor_trade_room(chat_entry):
                             time.sleep(0.1)
                             pyautogui.click(839, 328)
                             time.sleep(0.1)
+                            pyautogui.click(accept_button_location)
+                            time.sleep(0.1)
                             pyautogui.click(887, 328)
                             time.sleep(0.1)
                             pyautogui.click(706, 375)
@@ -338,25 +340,25 @@ def monitor_trade_room(chat_entry):
                             time.sleep(0.1)
                             pyautogui.click(887, 375)
                             time.sleep(0.1)
-                            pyautogui.click(703, 430),
+                            pyautogui.click(703, 468),
                             time.sleep(0.1)
-                            pyautogui.click(752, 430)
+                            pyautogui.click(752, 468)
                             time.sleep(0.1)
-                            pyautogui.click(793, 430)
+                            pyautogui.click(793, 468)
                             time.sleep(0.1)
-                            pyautogui.click(839, 430)
+                            pyautogui.click(839, 468)
                             time.sleep(0.1)
-                            pyautogui.click(887, 430)
+                            pyautogui.click(887, 468)
                             time.sleep(0.1)
                             pyautogui.click(703, 510)
                             time.sleep(0.1)
-                            pyautogui.click(752, 510)
+                            pyautogui.click(755, 513)
                             time.sleep(0.1)
-                            pyautogui.click(793, 510)
+                            pyautogui.click(801, 513)
                             time.sleep(0.1)
-                            pyautogui.click(839, 510)
+                            pyautogui.click(841, 512)
                             time.sleep(0.1)
-                            pyautogui.click(839, 510)
+                            pyautogui.click(886, 513)
                             print("Clicked on the money locations.")
                             
                             time.sleep(1)
@@ -369,6 +371,10 @@ def monitor_trade_room(chat_entry):
                                 total_gold += int(entry_value)
                                 app.update_ui(successful_sales, total_gold)
                                 print("Successful sales!!")
+                                time.sleep(3)
+                                return True
+                            return False
+                        
 
 
                     else:
@@ -377,75 +383,10 @@ def monitor_trade_room(chat_entry):
                         #stop_monitoring_trade_room()
                 else:
                     print("No text captured.")
-
-                
-            
-            if phase2_location:
-                print("Phase 2 detected.")
-                # Check for the total gold value
-
-                if is_debug_mode:
-                    debug_queue.put({'gold_value_location': hardcoded_coordinates})
-
-                # Use OCR to read the value
-                pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-                gold_value = pyautogui.screenshot(region=hardcoded_coordinates)
-
-                # Convert PIL Image to NumPy array
-                gold_value_np = np.array(gold_value)
-                
-                # Convert RGB to Grayscale
-                gray = cv2.cvtColor(gold_value_np, cv2.COLOR_BGR2GRAY)
-                
-                # Convert NumPy array to PIL Image
-                gray_image = Image.fromarray(gray)
-
-                # Save the screenshot for debugging
-                gray_image.save("./image_locations/debug_screenshot_gray.png")
-
-
-                # Custom Tesseract Configuration
-                custom_oem_psm_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789'
-                gold_value_text = pytesseract.image_to_string(gray_image, config=custom_oem_psm_config).strip()
-
-
-                if gold_value_text:
-                    print(f"Gold value region captured PHASE 2: {gold_value_text}")
-                    entry_value = chat_entry.get()  # Get the value from the Tkinter entry box
-                    if entry_value == gold_value_text:  # Convert gold_value_text to integer
-                        print("Gold value matches or is higher than the set entry value. Proceeding to click PHASE2")
-                        pyautogui.click(703, 319)
-                        time.sleep(0.1)
-                        pyautogui.click(752, 328)
-                        time.sleep(0.1)
-                        pyautogui.click(793, 332)
-                        time.sleep(0.1)
-                        pyautogui.click(839, 328)
-                        time.sleep(0.1)
-                        pyautogui.click(887, 328)
-                        pyautogui.click(706, 375)
-                        time.sleep(0.1)
-                        pyautogui.click(752, 375)
-                        time.sleep(0.1)
-                        pyautogui.click(794, 375)
-                        time.sleep(0.1)
-                        pyautogui.click(842, 375)
-                        time.sleep(0.1)
-                        pyautogui.click(887, 375)
-                        
-                        time.sleep(1)
-                        
-                        accept_button_location = pyautogui.locateOnScreen('./image_locations/greycheck.png', confidence=0.8)
-                        if accept_button_location:
-                            pyautogui.click(accept_button_location)
-                            time.sleep(3)
-                    else:
-                        print("Gold value does not match the set entry value.")
-                        #keyboard.press('esc')  # Press the Esc key to stop the trade
-                        #stop_monitoring_trade_room()
-                else:
-                    print("No text captured.")
-            
+                    
+        if is_stop_pressed is True:
+            print("Auto chat stopped. Exiting loop.")
+            break  # Exit the loop    
             time.sleep(1)  # Check every second or adjust this timing as needed
         else:
             print("You are not in a private trading room.")
@@ -460,11 +401,12 @@ def stop_monitoring_trade_room():
 
 
 # Function to start auto-chat
-def start_auto_chat(chat_entry):
+def start_auto_chat(chat_entry, multi_item_positions):
     global is_auto_chatting, item_position, is_stop_pressed
     is_stop_pressed = False
     #chat_text = chat_entry.get() + "g"  # Automatically append "g"
     
+    item_position = multi_item_positions
     # Check the type of chat_entry and act accordingly
     if hasattr(chat_entry, 'get'):
         chat_text = chat_entry.get() + "g"  # Automatically append "g"
@@ -538,12 +480,16 @@ def start_auto_chat(chat_entry):
                 pyautogui.press('enter')  # Press enter to send the message
             
             time.sleep(10)  # Adjust the timing as needed
+            
+        if is_stop_pressed is True:
+            print("Auto chat stopped. Exiting loop.")
+            break  # Exit the loop
 
 
 def stop_auto_chat():
     global is_auto_chatting, item_position, is_stop_pressed  # Declare item_position as global
     is_auto_chatting = False
-    item_position = None  # Reset the item position
+    #item_position = None  # Reset the item position
     chat_text = None
     is_stop_pressed = True
 
@@ -654,10 +600,13 @@ def goto_class(item_class):
     
     
     
+
+    
+
+
 def start_multi_sell(table_data):
-    global item_position, is_stop_pressed
     print("Starting multi selling...")
-    print("Data:", table_data)
+    print(f"Table data: {table_data}")
     
     for row in table_data:
         print(f"Current row data before processing: {row}")
@@ -667,10 +616,11 @@ def start_multi_sell(table_data):
         item_class = row['Class']
         price = row['Price']
         status = row['Status']
-        item_position = position
+
+        # Set item_position in thread-local storage
         
         # Skip if already sold
-        if row['Status'] == 'Sold':
+        if status == 'Sold':
             print(f"Skipping Row ID: {row_id}, Status: Sold")
             continue  # Skip to the next iteration
 
@@ -694,17 +644,25 @@ def start_multi_sell(table_data):
             time.sleep(0.3)
             pyautogui.moveTo(stash)
             pyautogui.click(stash)
-            start_auto_chat(price)
         else:
             print("No stash found")
-            
+        
+        item_position = row['Position']
+        item_position = item_position
+        start_auto_chat(price, position)
+        
+        was_successful = monitor_trade_room(price)  # Assume monitor_trade_room now returns a boolean
+        if was_successful:
+            row['Status'] = 'Sold'
+        else:
+            row['Status'] = 'Failed'
+        
         # Check if auto chat should be stopped
         if is_stop_pressed is True:
             print("Auto chat stopped. Exiting loop.")
             break  # Exit the loop
         
-        # Update status to 'Sold'
-        row['Status'] = 'Sold'
+        print(f"Row ID: {row_id}, Status: {row['Status']}")
         try:
             app.update_table()  # Update the table in the GUI
         except Exception as e:
