@@ -241,9 +241,10 @@ def capture_item_position(self, e):
  
     
 def monitor_trade_room(chat_entry):
-    global is_monitoring_trade_room, item_position 
+    global is_monitoring_trade_room, item_position, is_debug_mode, debug_queue, is_auto_chatting, is_stop_pressed
     global successful_sales, total_gold
 
+    is_auto_chatting = False
     is_monitoring_trade_room = True
     while is_monitoring_trade_room:  # Check the flag here
         # Check if you're in a private trading room
@@ -374,7 +375,6 @@ def monitor_trade_room(chat_entry):
                                 print("Successful sales!!")
                                 time.sleep(3)
                                 return True
-                            return False
                         
 
 
@@ -386,6 +386,10 @@ def monitor_trade_room(chat_entry):
                     print("No text captured.")
                     
             time.sleep(1)  # Check every second or adjust this timing as needed
+            if is_stop_pressed is True:
+                print("Stop pressed. Exiting loop.")
+                break  # Exit the loop
+            
         else:
             print("You are not in a private trading room.")
             stop_monitoring_trade_room()  # Stop monitoring the trade room
@@ -478,11 +482,11 @@ def start_auto_chat(chat_entry, multi_item_positions):
                 pyautogui.press('enter')  # Press enter to send the message
             
             time.sleep(10)  # Adjust the timing as needed
-            
-        if is_stop_pressed is True:
-            print("Auto chat stopped. Exiting loop.")
-            break  # Exit the loop
+        else:
+            print("No item position found. Stopping auto chat.")
+            stop_auto_chat()  # Stop the auto chat
 
+            
 
 def stop_auto_chat():
     global is_auto_chatting, item_position, is_stop_pressed  # Declare item_position as global
