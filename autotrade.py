@@ -240,7 +240,7 @@ def capture_item_position(self, e):
     
  
     
-def monitor_trade_room(chat_entry):
+def monitor_trade_room(chat_entry, current_row):
     global is_monitoring_trade_room, item_position, is_debug_mode, debug_queue, is_auto_chatting, is_stop_pressed
     global successful_sales, total_gold
 
@@ -371,6 +371,7 @@ def monitor_trade_room(chat_entry):
                                 time.sleep(3)
                                 successful_sales += 1
                                 total_gold += int(entry_value)
+                                current_row['Status'] = 'Sold'
                                 app.update_ui(successful_sales, total_gold)
                                 print("Successful sales!!")
                                 time.sleep(3)
@@ -404,7 +405,7 @@ def stop_monitoring_trade_room():
 
 
 # Function to start auto-chat
-def start_auto_chat(chat_entry, multi_item_positions):
+def start_auto_chat(chat_entry, multi_item_positions, current_row):
     global is_auto_chatting, item_position, is_stop_pressed
     is_stop_pressed = False
     #chat_text = chat_entry.get() + "g"  # Automatically append "g"
@@ -437,6 +438,7 @@ def start_auto_chat(chat_entry, multi_item_positions):
                 pyautogui.moveTo(stash)
                 pyautogui.click(stash)
                 print("Clicked stash")
+                time.sleep(3)
                 
                     # Calculate the new x-coordinate for the trade phase
                 new_trade_x = item_position.x + 318  # 318 is the offset
@@ -447,7 +449,7 @@ def start_auto_chat(chat_entry, multi_item_positions):
                 pyautogui.click(new_trade_position)
                 print("Clicked on new trade position")
                 
-                monitor_trade_room(chat_entry)
+                monitor_trade_room(chat_entry, current_row)
             stop_auto_chat()  # Stop the auto chat
             return  # Exit the function
         
@@ -539,56 +541,56 @@ def goto_class(item_class):
                         print("Navigating to Fighter trade chat...")
                         pyautogui.moveTo(1193, 287)
                         pyautogui.click(1193, 287)
-                        time.sleep(1)
+                        time.sleep(3)
                         
                         
                     elif item_class ==  "Wizard":
                         print("Navigating to Wizard trade chat...")
                         pyautogui.moveTo(1205, 595)
                         pyautogui.click(1205, 595)
-                        time.sleep(1)
+                        time.sleep(3)
                         
                     elif item_class ==  "Ranger":
                         print("Navigating to Ranger trade chat...")
                         pyautogui.moveTo(1188, 520)
                         pyautogui.click(1188, 520)
-                        time.sleep(1)
+                        time.sleep(3)
                         
                     elif item_class ==  "Rogue":
                         print("Navigating to Rogue trade chat...")
                         pyautogui.moveTo(1190, 444)
                         pyautogui.click(1190, 444)
-                        time.sleep(1)
+                        time.sleep(3)
                         
                     elif item_class ==  "Cleric":
                         print("Navigating to Cleric trade chat...")
                         pyautogui.moveTo(1193, 664)
                         pyautogui.click(1193, 664)
-                        time.sleep(1)
+                        time.sleep(3)
                         
                     elif item_class ==  "Bard":
                         print("Navigating to Bard trade chat...")
                         pyautogui.moveTo(1184, 752)
                         pyautogui.click(1184, 752)
-                        time.sleep(1)
+                        time.sleep(3)
                         
                     elif item_class ==  "Barbarian":
                         print("Navigating to Barbarian trade chat...")
                         pyautogui.moveTo(1188, 367)
                         pyautogui.click(1188, 367)
-                        time.sleep(1)
+                        time.sleep(3)
                         
                     elif item_class ==  "Warlock":
                         print("Navigating to Warlock trade chat...")
                         pyautogui.moveTo(1173, 814)
                         pyautogui.click(1173, 814)
-                        time.sleep(1)
+                        time.sleep(3)
                         
                     elif item_class ==  "Utility":
                         print("Navigating to Utility trade chat...")
                         pyautogui.moveTo(1185, 946)
                         pyautogui.click(1185, 946)
-                        time.sleep(1)
+                        time.sleep(3)
                         
                     elif item_class ==  "Default":
                         print("Navigating to Default trade chat...")
@@ -647,12 +649,13 @@ def start_multi_sell(table_data):
             time.sleep(0.3)
             pyautogui.moveTo(stash)
             pyautogui.click(stash)
+            time.sleep(3)
         else:
             print("No stash found")
         
         item_position = row['Position']
         item_position = item_position
-        start_auto_chat(price, position)
+        start_auto_chat(price, position, row)
 
         row['Status'] = 'Sold'
         print(f"Row ID: {row_id}, Status: {row['Status']}")
@@ -663,9 +666,9 @@ def start_multi_sell(table_data):
             print(f"An error occurred while updating the table: {e}")
 
         # Check if auto chat should be stopped
-        if is_stop_pressed is True:
-            print("Auto chat stopped. Exiting loop.")
-            break  # Exit the loop
+        # if is_stop_pressed is True:
+        #     print("Auto chat stopped. Exiting loop.")
+        #     break  # Exit the loop
 
         print(f"Item {item} from class {item_class} priced at {price} has been processed. Status: {row['Status']}")
         
