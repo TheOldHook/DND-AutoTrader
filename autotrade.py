@@ -327,8 +327,6 @@ def monitor_trade_room(chat_entry, current_row):
                             time.sleep(0.1)
                             pyautogui.click(839, 328)
                             time.sleep(0.1)
-                            pyautogui.click(accept_button_location)
-                            time.sleep(0.1)
                             pyautogui.click(887, 328)
                             time.sleep(0.1)
                             pyautogui.click(706, 375)
@@ -341,7 +339,17 @@ def monitor_trade_room(chat_entry, current_row):
                             time.sleep(0.1)
                             pyautogui.click(887, 375)
                             time.sleep(0.1)
-                            pyautogui.click(703, 468),
+                            pyautogui.click(703, 415)
+                            time.sleep(0.1)
+                            pyautogui.click(752, 415)
+                            time.sleep(0.1)
+                            pyautogui.click(793, 415)
+                            time.sleep(0.1)
+                            pyautogui.click(839, 415)
+                            time.sleep(0.1)
+                            pyautogui.click(887, 415)
+                            time.sleep(0.1)
+                            pyautogui.click(703, 468)
                             time.sleep(0.1)
                             pyautogui.click(752, 468)
                             time.sleep(0.1)
@@ -350,6 +358,7 @@ def monitor_trade_room(chat_entry, current_row):
                             pyautogui.click(839, 468)
                             time.sleep(0.1)
                             pyautogui.click(887, 468)
+                            time.sleep(0.1)
                             pyautogui.click(703, 510)
                             time.sleep(0.1)
                             pyautogui.click(703, 510)
@@ -376,9 +385,13 @@ def monitor_trade_room(chat_entry, current_row):
                                 print("Successful sales!!")
                                 time.sleep(3)
                                 is_stop_pressed = False
-                                return True
-                        
-
+                                return
+                            else:
+                                print("No accept button found")
+                                current_row['Status'] = 'Failed'
+                        else:
+                            print("No accept button found")
+                            current_row['Status'] = 'Failed'
 
                     else:
                         print("Gold value does not match the set entry value.")
@@ -413,9 +426,9 @@ def start_auto_chat(chat_entry, multi_item_positions, current_row):
     item_position = multi_item_positions
     # Check the type of chat_entry and act accordingly
     if hasattr(chat_entry, 'get'):
-        chat_text = chat_entry.get() + "g"  # Automatically append "g"
+        chat_text = " " + chat_entry.get() + "g"  # Automatically append "g"
     else:
-        chat_text = chat_entry + "g"  # Assume it's a string and append "g"
+        chat_text = " " + chat_entry + "g"  # Assume it's a string and append "g"
 
     while item_position is None:
         time.sleep(1)
@@ -456,14 +469,18 @@ def start_auto_chat(chat_entry, multi_item_positions, current_row):
         
         if item_position:
             pyautogui.moveTo(item_position.x, item_position.y)
-            time.sleep(0.5)  # Pause for a moment
+            time.sleep(1)  # Pause for a moment
 
             keyboard.press('shift')  # Press and hold shift using keyboard library
-            time.sleep(2)  # Hold the Shift key down for a bit longer
+            time.sleep(1)  # Hold the Shift key down for a bit longer
+            
+            pyautogui.moveTo(item_position.x, item_position.y)
+            time.sleep(0.1)  # Pause for a moment
+            pyautogui.click(item_position.x, item_position.y)  # Click the item using pyautogui
 
-            pyautogui.mouseDown(button='left')  # Mouse down using pyautogui
-            time.sleep(1)  # Allow time for the click to register
-            pyautogui.mouseUp(button='left')  # Mouse up using pyautogui
+            # pyautogui.mouseDown(button='left')  # Mouse down using pyautogui
+            # time.sleep(1)  # Allow time for the click to register
+            # pyautogui.mouseUp(button='left')  # Mouse up using pyautogui
 
             keyboard.release('shift')  # Release shift using keyboard library
             time.sleep(0.2)  # Release the Shift key after a moment
@@ -610,6 +627,7 @@ def goto_class(item_class):
 
 
 def start_multi_sell(table_data):
+    global is_auto_chatting, is_stop_pressed
     print("Starting multi selling...")
     print(f"Table data: {table_data}")
     
@@ -621,6 +639,7 @@ def start_multi_sell(table_data):
         item_class = row['Class']
         price = row['Price']
         status = row['Status']
+        is_auto_chatting = False
 
         # Set item_position in thread-local storage
         
@@ -657,7 +676,7 @@ def start_multi_sell(table_data):
         item_position = item_position
         start_auto_chat(price, position, row)
 
-        row['Status'] = 'Sold'
+        #row['Status'] = 'Sold'
         print(f"Row ID: {row_id}, Status: {row['Status']}")
         
         try:
@@ -666,9 +685,9 @@ def start_multi_sell(table_data):
             print(f"An error occurred while updating the table: {e}")
 
         # Check if auto chat should be stopped
-        # if is_stop_pressed is True:
-        #     print("Auto chat stopped. Exiting loop.")
-        #     break  # Exit the loop
+        if is_stop_pressed is True:
+            print("Auto chat stopped. Exiting loop.")
+            break  # Exit the loop
 
         print(f"Item {item} from class {item_class} priced at {price} has been processed. Status: {row['Status']}")
         
