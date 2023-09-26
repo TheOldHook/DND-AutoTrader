@@ -694,10 +694,6 @@ def start_multi_sell(table_data):
 
 
 
-    
-
-
-
 from tkinter import Canvas, Scrollbar
 import psutil
 
