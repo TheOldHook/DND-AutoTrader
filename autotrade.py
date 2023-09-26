@@ -518,6 +518,7 @@ def stop_auto_chat():
     print("Stopped auto chat and cleared item position.")
 
 
+
 # Inside your GUI setup code, add these elements:
 # Function to validate input for only numbers
 def validate_input(P):
