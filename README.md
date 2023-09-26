@@ -9,17 +9,9 @@
   <img src="./image_locations/header.png">
 </p>
 
-Releasing a hobby project.
+Releasing a hobby project that i've used as a motivator to extend my coding knowledge.
+
 Welcome to The Old Trader - Dark And Darker - Auto Trader, an automated trading and selling tool for your favorite online game! This Python-based application simplifies the trading process and makes your in-game life easier.
-
-## Table of Contents
-
-- [Installation](#installation)
-- [Usage](#usage)
-- [Configuration](#configuration)
-- [Dependencies](#dependencies)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Installation
 
@@ -31,12 +23,10 @@ Before you start using The Old Trader, make sure to install the required depende
 
 3. **Python Dependencies**: Install the Python packages required for this project. You can use the following command:
 
-   ```
-   pip install -r requirements.txt
-Usage
+```
+pip install -r requirements.txt
+```
 Clone this repository to your local machine:
-
-
 ```
 git clone https://github.com/TheOldHook/DND-AutoTrader.git
 ```
@@ -47,14 +37,25 @@ Configure the application as needed (see Configuration).
 Start the application:
 
 ```python autotrade.py```
-Follow the on-screen instructions and in terminal and enjoy automated trading!
+Enjoy automated selling!
 
-```Auto Trader Tab```, is using image rec to find images in chat that you can add and it will automaticly make trade requests, i made this because i was tired of being too late for a good item.
+```Auto Trader Tab```
+Using image rec to find images in chat that you can add and it will automaticly make trade requests, i made this because i was tired of being too late for a good item, but it needs some work and its not perfect.
+You can do print screens WIN + SHIFT + S and crop out any item you usually buy, save it and load it here and it will automaticly try to scan within a zone at the bottom (You can toggle multiple images).
 
-```Auto Sell Tab```, you can choose to only sell one item or if you want to use the more "advanced" multi-sell feature where you just use SHIFT to select items you want to sell before pressing start (while in the trade channel).
+```Auto Sell Tab``` 
+Choose to sell one item quick with "Single-Sell" or use the "Multi-sell" feature for automating going to different channels and pricing items (before pressing start).
+SHIFT to select items position you want to sell before pressing start (must be done while in the trade channel).
+
+Always start the trader when you are inside a tradechannel and you need to add the positions there because its compensating an offset when you get to the stash inside a trade (it changes location based on the DND UI), it will use OCR (Optical Character Recognition) to scan for the gold value added by the other player, and its adding the item (position) to the trade, clicking accept if the value is the same as you set as the price, click on all cells inside the buyers frame and clicking accept to close the deal.
+
+This makes it easy to sell to other players while you are sleeping, cooking dinner, changing diapers, watching stream or whatever.
+And when you get back you hopefully have a lot of gold that you can lose together with your friends in your next game.
+
+Killswitch feature added that closes the script and the DND process after a given time.
 
 Configuration
-You can configure The Old Trader by modifying the settings in the source code or by using command-line arguments. Customize the application to your preferences and trading needs.
+You can configure The Old Trader by modifying the settings in the source code as you like.
 
 Dependencies
 The Old Trader relies on the following Python packages:
@@ -67,12 +68,13 @@ The Old Trader relies on the following Python packages:
 
 
 Contributing
-We welcome contributions from the community. If you find a bug, have a feature request, or want to contribute in any way, please open an issue or create a pull request.
+We welcome contributions. If you find a bug, have a feature request, or want to contribute in any way, please open an issue or create a pull request.
+This is far from perfect, but the time you find yourself using on selling items that stack up in your inventory is a lot.
 
-License
-This project is licensed under the MIT License. See the LICENSE file for details.
+I also want to point out that you are most likely not going to get banned using this software but use at your own risk.
+
 
 <p align="center">
-  Made with ❤️ by TheOldHook
+  Made by TheOldHook
 </p>
 ```
