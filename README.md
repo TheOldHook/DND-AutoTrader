@@ -9,7 +9,7 @@
   <img src="./image_locations/header.png">
 </p>
 
-
+Releasing a hobby project.
 Welcome to The Old Trader - Dark And Darker - Auto Trader, an automated trading and selling tool for your favorite online game! This Python-based application simplifies the trading process and makes your in-game life easier.
 
 ## Table of Contents
@@ -31,7 +31,7 @@ Before you start using The Old Trader, make sure to install the required depende
 
 3. **Python Dependencies**: Install the Python packages required for this project. You can use the following command:
 
-   ```bash
+   ```
    pip install -r requirements.txt
 Usage
 Clone this repository to your local machine:
