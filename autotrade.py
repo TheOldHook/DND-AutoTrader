@@ -36,7 +36,7 @@ is_shift_pressed = False
 is_stop_pressed = False
 
 # For dropdown menus
-class_list = ["Fighter", "Wizard", "Ranger", "Rogue", "Cleric", "Bard", "Barbarian", "Warlock", "Utility", "Default"]
+class_list = ["Fighter", "Wizard", "Ranger", "Rogue", "Cleric", "Bard", "Barbarian", "Warlock", "Utility"]
 
 ##################### Debugging start #######################################
 is_debug_mode = False
@@ -225,7 +225,7 @@ def capture_item_position(self, e):
             "RowId": str(uuid.uuid4()),  # Generate a unique ID for each entry
             "Position": position,
             "Item": "Gear",
-            "Class": "Default",  # Set the default value as a string
+            "Class": "Ranger",  # Set the default value as a string
             "Price": "100",
             "Status": ""
         }
@@ -609,8 +609,6 @@ def goto_class(item_class):
                         pyautogui.click(1185, 946)
                         time.sleep(3)
                         
-                    elif item_class ==  "Default":
-                        print("Navigating to Default trade chat...")
                 else:
                     print("No select channel found")
             else:
